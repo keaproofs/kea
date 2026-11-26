@@ -1,0 +1,18 @@
+[profile.default]
+src = "src"
+test = "test"
+out = "out"
+libs = ["lib"]
+solc_version = "0.8.28"
+evm_version = "cancun"
+optimizer = true
+optimizer_runs = 10000
+# halmos cannot run deployCode, which dynamic test linking writes in place of `new`.
+dynamic_test_linking = false
+remappings = [
+  "forge-std/=lib/forge-std/src/",
+  "halmos-cheatcodes/=lib/halmos-cheatcodes/src/",
+]
+
+[fuzz]
+runs = 2000

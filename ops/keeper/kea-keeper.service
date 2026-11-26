@@ -1,0 +1,11 @@
+[Unit]
+Description=Kea keeper: move, split and burn the launch's creator fees
+After=network-online.target
+Wants=network-online.target
+# Nothing to keep until the launch exists and its addresses are written here.
+ConditionPathExists=/etc/kea/keeper.conf
+
+[Service]
+Type=oneshot
+Environment=PATH=/root/.foundry/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ExecStart=/usr/local/bin/kea-keeper

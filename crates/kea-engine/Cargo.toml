@@ -1,0 +1,25 @@
+[package]
+name = "kea-engine"
+description = "Kea's engine: fetch a contract, draft claims and checks, prove them, review the words, keep the best"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+alloy-primitives.workspace = true
+anyhow.workspace = true
+kea-chain.workspace = true
+kea-claims.workspace = true
+kea-core.workspace = true
+kea-prover.workspace = true
+kea-sources.workspace = true
+serde_json.workspace = true
+
+[dev-dependencies]
+tokio.workspace = true
+
+[lints]
+workspace = true

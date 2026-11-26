@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# Kea's keeper: moves the launch's creator fees into the escrow, releases them through the splitter, and burns what the
+# burner holds. kea-keeper.timer runs it hourly. It signs as the burner's keeper, from an encrypted keystore.
+#
+# /etc/kea/keeper.conf (or $KEA_KEEPER_CONF) sets RPC, SPLITTER, BURNER, CURVE and ESCROW.
+# Every send is dry-run first, so a step with nothing to do costs nothing. A failed step is logged and the next one
+# still runs.
+set -uo pipefail
+
+. "${KEA_KEEPER_CONF:-/etc/kea/keeper.conf}"
+export ETH_RPC_URL="$RPC"
+wallet=(--keystore "${KEYSTORE:-/etc/kea/keeper/keeper}" --password-file "${PASSWORD_FILE:-/etc/kea/keeper/password}")
+hook=0xE5e702641Ea86F4ae6cC3cDaeD2B886f976Be044
+min_release=${MIN_RELEASE_WEI:-500000000000000} # 0.0005 ETH
+min_burn=${MIN_BURN_WEI:-1000000000000000}      # 0.001 ETH
+low_gas=${LOW_GAS_WEI:-300000000000000}         # 0.0003 ETH
+keeper=$(cast wallet address "${wallet[@]}")
+
+log() { printf '%s %s\n' "$(date -u +%FT%TZ)" "$*"; }
+# cast prints big numbers as "123 [1.23e2]"; bash arithmetic would overflow on token amounts, so python compares.
+num() { awk '{print $1}'; }
+ge() { python3 -c 'import sys; sys.exit(int(sys.argv[1]) < int(sys.argv[2]))' "$1" "$2"; }
+# Sends only what a dry run says succeeds, then prints the transaction hash and whether it went through.
+send() {
+  cast call --from "$keeper" "$@" >/dev/null 2>&1 || return 3
+  cast send "${wallet[@]}" --json "$@" |
+    python3 -c 'import json,sys; r=json.load(sys.stdin); print(r["transactionHash"], "ok" if str(r["status"]) in ("0x1","1") else "FAILED")'
+}
+
+gas=$(cast balance "$keeper")
+ge "$gas" "$low_gas" || log "WARN the keeper's gas is low: $gas wei on $keeper"
+
+# 1. Fees wait in the curve before graduation and in the pool hook after it; the splitter moves them to the escrow.
+if [ "$(cast call "$BURNER" 'graduated()(bool)')" = true ]; then
+  pool=$(cast call "$BURNER" 'poolId()(bytes32)')
+  if out=$(send "$SPLITTER" 'sweepPool(address,bytes32)' "$hook" "$pool"); then log "swept the pool: $out"; fi
+else
+  if out=$(send "$SPLITTER" 'sweepCurve(address)' "$CURVE"); then log "swept the curve: $out"; fi
+fi
+
+# 2. The splitter claims the escrow and splits it between the bounty pool, the burner and the team.
+owed=$(cast call "$ESCROW" 'balanceOf(address)(uint256)' "$SPLITTER" | num)
+due=$(python3 -c 'import sys; print(int(sys.argv[1]) + int(sys.argv[2]))' "$owed" "$(cast balance "$SPLITTER")")
+if ge "$due" "$min_release"; then
+  if out=$(send "$SPLITTER" 'release()'); then log "released $due wei: $out"; else log "ERROR the release of $due wei failed"; fi
+fi
+
+# 3. A dry run as the keeper tells what the burner's ETH buys now; the burn takes no fewer than 97% of those tokens.
+held=$(cast balance "$BURNER")
+if ge "$held" "$min_burn"; then
+  token=$(cast call "$BURNER" 'token()(address)')
+  before=$(cast call "$token" 'balanceOf(address)(uint256)' "$BURNER" | num)
+  expect=$(cast call --from "$keeper" "$BURNER" 'burn(uint256)(uint256)' 0 | num)
+  floor=$(python3 -c 'import sys; print((int(sys.argv[1]) - int(sys.argv[2])) * 97 // 100)' "$expect" "$before")
+  if out=$(send "$BURNER" 'burn(uint256)' "$floor"); then
+    log "burned $expect tokens for $held wei: $out"
+  else
+    log "ERROR the burn of $held wei failed"
+  fi
+fi

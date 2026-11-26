@@ -1,0 +1,1398 @@
+/* The launch site's pages and chrome. Tokens and the ask form live in styles.css. */
+
+.kx {
+  position: relative;
+  min-height: 100vh;
+  overflow-x: clip;
+  color: var(--kx-text);
+  background:
+    radial-gradient(1100px 720px at 74% 400px, rgb(90 101 36 / 0.32), transparent 62%),
+    radial-gradient(900px 600px at 10% 110%, rgb(229 81 43 / 0.08), transparent 60%),
+    var(--kx-ground);
+}
+
+.kx::after {
+  /* film grain: the page is lit, not rendered */
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  /* normal blending: a blend mode over a live canvas costs the compositor every frame */
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+.kx-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.kx > header,
+.kx > main,
+.kx > footer {
+  position: relative;
+  z-index: 1;
+}
+
+/* ---------- Header ---------- */
+
+.kx-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  white-space: nowrap;
+  height: 72px;
+  padding: 0 var(--pad);
+  border-bottom: 1px solid var(--kx-line);
+}
+
+.kx-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--kx-text);
+  text-decoration: none;
+  font-weight: 800;
+  font-size: 1.3rem;
+  letter-spacing: -0.03em;
+}
+
+.kx-brand img {
+  border-radius: 7px;
+}
+
+.kx-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 6px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 1px var(--kx-line);
+  font-family: var(--mono);
+  font-size: 0.76rem;
+  color: var(--kx-muted);
+}
+
+.kx-chip-key {
+  color: var(--kx-found);
+  font-weight: 500;
+}
+
+.kx-nav {
+  display: flex;
+  gap: 22px;
+  margin-left: 18px;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.kx-nav a {
+  color: var(--kx-muted);
+  text-decoration: none;
+  transition: color 200ms var(--ease-out);
+}
+
+.kx-nav a:hover {
+  color: var(--kx-text);
+}
+
+.kx-network {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  padding: 7px 12px;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px var(--kx-line);
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--kx-muted);
+}
+
+.kx-dot {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--kx-proven);
+  box-shadow: 0 0 0 3px rgb(184 196 94 / 0.16);
+}
+
+.kx-launch {
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: var(--kx-text);
+  color: var(--kx-ground);
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: background 180ms var(--ease-out), transform 160ms var(--ease-out);
+}
+
+.kx-launch:active {
+  transform: scale(0.97);
+}
+
+.kx-launch:hover {
+  background: #fff;
+}
+
+/* ---------- Hero ---------- */
+
+.kx-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.04fr) minmax(0, 0.96fr);
+  align-items: center;
+  gap: clamp(16px, 3vw, 48px);
+  padding: clamp(20px, 3.5vh, 40px) var(--pad) 0;
+}
+
+.kx-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 6px 6px 12px;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px var(--kx-line);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--kx-muted);
+}
+
+.kx-live-count {
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: var(--kx-panel);
+  color: var(--kx-text);
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+.kx-title {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  font-size: clamp(3rem, 6.1vw, 6.6rem);
+  font-weight: 800;
+  letter-spacing: -0.055em;
+  line-height: 0.92;
+}
+
+.kx-line {
+  display: block;
+  padding-bottom: 0.06em;
+  white-space: nowrap;
+  /* clip only above and below, so the words rise out of their own line */
+  clip-path: inset(-0.2em -100vw 0 -100vw);
+}
+
+.kx-line > span {
+  display: inline-block;
+}
+
+.kx-accent {
+  color: var(--kx-vermilion);
+}
+
+.kx-lede {
+  margin-top: 20px;
+  max-width: 40ch;
+  font-size: clamp(1.08rem, 1.4vw, 1.25rem);
+  line-height: 1.5;
+  color: var(--kx-muted);
+}
+
+.kx-ask {
+  margin-top: 24px;
+  max-width: 560px;
+}
+
+.kx-latest {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  color: var(--kx-muted);
+  font-size: 0.95rem;
+  text-decoration: none;
+}
+
+.kx-latest strong {
+  color: var(--kx-text);
+}
+
+.kx-latest svg,
+.kx-tile-link svg {
+  transition: transform 260ms var(--ease-out);
+}
+
+.kx-latest:hover svg,
+.kx-tile-link:hover svg {
+  transform: translateX(3px);
+}
+
+.kx-latest:hover strong {
+  text-decoration: underline;
+  text-decoration-color: var(--kx-vermilion);
+}
+
+.kx-stage {
+  position: relative;
+  height: clamp(320px, 55vh, 580px);
+}
+
+.kx-stage-fallback {
+  display: none;
+}
+
+.kx-stage-flat .kx-stage-fallback {
+  display: block;
+  width: min(100%, 460px);
+  margin: 0 auto;
+  border-radius: 28px;
+}
+
+/* ---------- The strip of reports ---------- */
+
+.kx-reports {
+  padding: 6px 0 72px;
+}
+
+.kx-strip {
+  position: relative;
+  height: 256px;
+  perspective: 1300px;
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+}
+
+.kx-strip-track {
+  position: relative;
+  height: 100%;
+  transform-style: preserve-3d;
+}
+
+.kx-card {
+  position: absolute;
+  left: 0;
+  top: 12px;
+  height: 228px;
+  padding: 18px 18px 16px;
+  border-radius: 18px;
+  display: grid;
+  grid-template-rows: auto auto auto 1fr auto auto;
+  gap: 6px;
+  color: var(--kx-text);
+  text-decoration: none;
+  background: linear-gradient(180deg, #191c12, #10120c);
+  box-shadow: inset 0 0 0 1px var(--kx-line), 0 30px 50px -36px rgb(0 0 0 / 0.9);
+  will-change: transform, opacity;
+}
+
+.kx-card {
+  transition: box-shadow 260ms var(--ease-out);
+}
+
+.kx-card:hover {
+  box-shadow: inset 0 0 0 1px rgb(239 232 214 / 0.22), 0 30px 50px -36px rgb(0 0 0 / 0.9);
+}
+
+/* a long name steps down a size instead of losing its end */
+.kx-card-name-long {
+  font-size: 1.12rem;
+  line-height: 1.3;
+}
+
+.kx-card-top {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--kx-faint);
+}
+
+.kx-card-name {
+  min-height: 1.1em;
+  margin-top: 6px;
+  font-weight: 800;
+  font-size: 1.45rem;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.kx-card-address {
+  font-family: var(--mono);
+  font-size: 0.76rem;
+  color: var(--kx-faint);
+}
+
+.kx-card-claim {
+  align-self: center;
+  display: grid;
+  gap: 3px;
+  font-size: 0.86rem;
+  line-height: 1.3;
+  color: #d9d4c4;
+}
+
+.kx-card-claim > span:first-child {
+  font-family: var(--mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.kx-card-claim > span:last-child {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.kx-bar {
+  align-self: end;
+  display: flex;
+  gap: 3px;
+  height: 8px;
+}
+
+.kx-bar > span {
+  min-width: 0;
+  border-radius: 3px;
+}
+
+.kx-bar-proven {
+  background: var(--kx-proven-fill);
+}
+
+.kx-bar-found {
+  background: var(--kx-vermilion);
+}
+
+.kx-bar-unclear {
+  background: rgb(239 232 214 / 0.16);
+}
+
+.kx-card-counts {
+  display: flex;
+  gap: 12px;
+  font-family: var(--mono);
+  font-size: 0.74rem;
+}
+
+.kx-word-proven {
+  color: var(--kx-proven);
+}
+
+.kx-word-found {
+  color: var(--kx-found);
+}
+
+.kx-word-unclear {
+  color: var(--kx-muted);
+}
+
+.kx-note {
+  padding: 0 var(--pad);
+  color: var(--kx-muted);
+}
+
+/* ---------- The opening ---------- */
+
+@media (prefers-reduced-motion: no-preference) {
+  .kx-header {
+    animation: kx-fade 700ms var(--ease-out) both;
+  }
+
+  .kx-live {
+    animation: kx-up 700ms var(--ease-out) 150ms both;
+  }
+
+  .kx-line > span {
+    animation: kx-rise 1000ms var(--ease-out) 240ms both;
+  }
+
+  .kx-accent > span {
+    animation-delay: 380ms;
+  }
+
+  .kx-lede {
+    animation: kx-up 800ms var(--ease-out) 620ms both;
+  }
+
+  .kx-ask {
+    animation: kx-up 800ms var(--ease-out) 740ms both;
+  }
+
+  .kx-latest {
+    animation: kx-up 800ms var(--ease-out) 860ms both;
+  }
+
+  .kx-reports {
+    animation: kx-up 1100ms var(--ease-out) 1100ms both;
+  }
+
+  .kx-dot {
+    animation: kx-pulse 2.4s ease-in-out infinite;
+  }
+}
+
+@keyframes kx-rise {
+  from {
+    transform: translateY(108%);
+  }
+}
+
+@keyframes kx-up {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+}
+
+@keyframes kx-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes kx-pulse {
+  50% {
+    box-shadow: 0 0 0 6px rgb(184 196 94 / 0);
+  }
+}
+
+/* ---------- Narrow screens ---------- */
+
+@media (max-width: 1240px) {
+  .kx-chip {
+    display: none;
+  }
+}
+
+@media (max-width: 1120px) {
+  .kx-network {
+    display: none;
+  }
+
+  .kx-launch {
+    margin-left: auto;
+  }
+}
+
+@media (max-width: 980px) {
+  .kx-chip,
+  .kx-nav {
+    display: none;
+  }
+
+  .kx-hero {
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 0;
+  }
+
+  .kx-stage {
+    order: -1;
+    height: clamp(260px, 44vh, 420px);
+  }
+}
+
+@media (max-width: 560px) {
+
+  .kx-live {
+    font-size: 0.64rem;
+    letter-spacing: 0.08em;
+  }
+
+  .kx-live-count {
+    display: none;
+  }
+
+  .kx .slot-row {
+    flex-direction: column;
+  }
+
+  .kx .slot-button {
+    padding: 14px 18px;
+  }
+
+  .kx-strip {
+    height: 226px;
+  }
+}
+
+/* ---------- Section dots ---------- */
+
+.kx-dots {
+  position: fixed;
+  right: 18px;
+  top: 50%;
+  z-index: 4;
+  transform: translateY(-50%);
+  display: grid;
+  gap: 6px;
+}
+
+.kx-dots-item {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.kx-dots-item span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  /* 3.5:1 on the ground: a control has to be seen before it is current */
+  background: rgb(239 232 214 / 0.42);
+  transition: transform 300ms var(--ease-out), background 300ms var(--ease-out);
+}
+
+.kx-dots-item[aria-current="true"] span {
+  background: var(--kx-vermilion);
+  transform: scale(1.5);
+}
+
+/* ---------- Shared section parts ---------- */
+
+.kx main > section {
+  position: relative;
+}
+
+.kx-section-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px clamp(24px, 4vw, 64px);
+  align-items: end;
+  padding: 0 var(--pad);
+}
+
+.kx h2 {
+  font-size: clamp(2.4rem, 5vw, 4.6rem);
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  line-height: 0.95;
+}
+
+.kx-section-head p {
+  max-width: 46ch;
+  color: var(--kx-muted);
+  font-size: 1.1rem;
+  line-height: 1.5;
+}
+
+.kx-mini-word {
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.kx-word-text {
+  color: var(--kx-muted);
+}
+
+/* ---------- Stats ---------- */
+
+.kx-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: clamp(24px, 6vw, 72px) var(--pad) 0;
+  border-top: 1px solid var(--kx-line);
+  border-bottom: 1px solid var(--kx-line);
+}
+
+.kx-stat {
+  padding: 30px 24px 30px 0;
+}
+
+.kx-stat + .kx-stat {
+  padding-left: 24px;
+  border-left: 1px solid var(--kx-line);
+}
+
+.kx-stat-value {
+  font-size: clamp(2.8rem, 5.4vw, 5rem);
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.kx-stat-label {
+  margin-top: 10px;
+  max-width: 22ch;
+  color: var(--kx-muted);
+  font-size: 0.95rem;
+}
+
+/* ---------- The story: pinned while the mark comes apart ---------- */
+
+.kx-story {
+  height: 420vh;
+  margin-top: clamp(64px, 10vw, 140px);
+}
+
+.kx-story-sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  /* the light pool travels with the pinned mark */
+  background: radial-gradient(900px 640px at 74% 52%, rgb(90 101 36 / 0.24), transparent 62%);
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  align-items: center;
+  gap: clamp(16px, 3vw, 48px);
+  padding: 0 var(--pad);
+}
+
+.kx-story-copy {
+  display: grid;
+  gap: 28px;
+}
+
+.kx-steps {
+  display: flex;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.kx-steps li {
+  position: relative;
+  flex: 1;
+  display: grid;
+  gap: 6px;
+  padding-top: 14px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--kx-muted);
+  transition: color 500ms var(--ease-out);
+}
+
+.kx-steps li::before,
+.kx-steps li::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 2px;
+  border-radius: 2px;
+}
+
+.kx-steps li::before {
+  background: rgb(239 232 214 / 0.12);
+}
+
+.kx-steps li::after {
+  background: var(--kx-vermilion);
+  transform-origin: left;
+  transform: scaleX(clamp(0, calc(var(--story, 0) - var(--i, 0)), 1));
+}
+
+.kx-steps li span {
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+}
+
+.kx-steps li.is-on {
+  color: var(--kx-text);
+}
+
+.kx-panels {
+  display: grid;
+  min-height: 300px;
+}
+
+.kx-panel {
+  grid-area: 1 / 1;
+  display: grid;
+  align-content: start;
+  gap: 16px;
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 520ms var(--ease-out), transform 720ms var(--ease-out);
+  pointer-events: none;
+}
+
+.kx-panel.is-on {
+  opacity: 1;
+  transform: none;
+  transition-delay: 120ms;
+  pointer-events: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kx-panel,
+  .kx-panel.is-on {
+    transform: none;
+    transition: opacity 200ms linear;
+  }
+}
+
+.kx-panel h3 {
+  font-size: clamp(1.5rem, 2.4vw, 2.1rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.kx-panel > p {
+  max-width: 46ch;
+  color: var(--kx-muted);
+  line-height: 1.55;
+}
+
+.kx-specimen {
+  display: grid;
+  gap: 6px;
+  max-width: 520px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: var(--kx-panel);
+  box-shadow: inset 0 0 0 1px var(--kx-line);
+}
+
+.kx-specimen p {
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.kx-specimen .kx-specimen-sub {
+  /* a specimen, not the report: the whole note is one click away */
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-weight: 400;
+  font-size: 0.92rem;
+  color: var(--kx-muted);
+}
+
+.kx-story-stage {
+  height: 74vh;
+}
+
+/* ---------- What Kea does ---------- */
+
+.kx-product {
+  padding: clamp(40px, 8vw, 110px) 0 0;
+}
+
+.kx-product h2 {
+  max-width: 14ch;
+}
+
+.kx-bento {
+  margin: clamp(28px, 4vw, 48px) var(--pad) 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.kx-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: clamp(20px, 2.4vw, 30px);
+  border-radius: 20px;
+  background: linear-gradient(180deg, #171a11, #11130c);
+  box-shadow: inset 0 0 0 1px var(--kx-line);
+}
+
+.kx-tile-wide {
+  grid-column: span 2;
+}
+
+.kx-tile h3 {
+  font-size: 1.45rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.kx-tile > p {
+  color: var(--kx-muted);
+  line-height: 1.5;
+  max-width: 48ch;
+}
+
+.kx-mini {
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+}
+
+.kx-mini li {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  gap: 12px;
+  align-items: baseline;
+  padding: 11px 0;
+  border-top: 1px solid var(--kx-line);
+  font-weight: 600;
+}
+
+.kx-mini .kx-mini-source {
+  display: block;
+  font-weight: 400;
+  font-size: 0.85rem;
+  color: var(--kx-muted);
+}
+
+.kx-twins {
+  width: 100%;
+  max-width: 340px;
+  margin-top: auto;
+  padding-top: 18px;
+  fill: none;
+  stroke: rgb(239 232 214 / 0.35);
+  stroke-width: 1.5;
+}
+
+.kx-twins .kx-twins-report {
+  stroke: var(--kx-proven);
+  fill: rgb(184 196 94 / 0.08);
+}
+
+.kx-twins .kx-twins-check {
+  stroke: var(--kx-proven);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.kx-tile-link {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 6px;
+  color: var(--kx-text);
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-color: var(--kx-vermilion);
+  text-underline-offset: 0.25em;
+}
+
+.kx-badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+  margin-top: auto;
+  padding-top: 6px;
+}
+
+.kx-badge-row code {
+  flex: 1 1 320px;
+  min-width: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #0b0d07;
+  box-shadow: inset 0 0 0 1px var(--kx-line);
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  color: var(--kx-muted);
+  overflow-wrap: anywhere;
+}
+
+/* ---------- Every report ---------- */
+
+.kx-live-grid {
+  padding: clamp(72px, 10vw, 140px) 0 0;
+}
+
+.kx-grid {
+  margin: clamp(24px, 3vw, 36px) var(--pad) 0;
+}
+
+.kx-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.kx-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--kx-line);
+  color: var(--kx-muted);
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: background 200ms var(--ease-out), color 200ms var(--ease-out);
+}
+
+.kx-tab[aria-selected="true"] {
+  background: var(--kx-text);
+  color: var(--kx-ground);
+}
+
+.kx-tab-count {
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
+.kx-table {
+  margin-top: 16px;
+  border-top: 1px solid var(--kx-line);
+}
+
+.kx-row {
+  display: grid;
+  grid-template-columns: minmax(0, 2.4fr) repeat(3, minmax(0, 1fr)) minmax(0, 1.4fr);
+  gap: 12px;
+  align-items: center;
+  padding: 16px 4px;
+  border-bottom: 1px solid var(--kx-line);
+  color: var(--kx-text);
+  text-decoration: none;
+  transition: background 200ms var(--ease-out);
+}
+
+a.kx-row:hover {
+  background: rgb(239 232 214 / 0.03);
+}
+
+.kx-row-head {
+  padding: 10px 4px;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--kx-faint);
+}
+
+.kx-row-name {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.kx-row-name strong {
+  font-size: 1.08rem;
+  letter-spacing: -0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.kx-row-name .mono {
+  font-size: 0.76rem;
+  color: var(--kx-faint);
+}
+
+.kx-num {
+  font-family: var(--mono);
+  font-size: 0.86rem;
+}
+
+.kx-zero {
+  color: var(--kx-faint);
+}
+
+.kx-row-time {
+  color: var(--kx-muted);
+  font-size: 0.88rem;
+  white-space: nowrap;
+}
+
+.kx-empty {
+  padding: 24px 4px;
+  color: var(--kx-muted);
+}
+
+/* ---------- Bounty ---------- */
+
+.kx-bounty {
+  padding: clamp(72px, 10vw, 140px) 0 0;
+}
+
+.kx-rules {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: clamp(28px, 4vw, 48px) var(--pad) 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--kx-line);
+}
+
+.kx-rules li {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  padding: 26px 22px 6px 0;
+}
+
+.kx-rules li + li {
+  padding-left: 22px;
+  border-left: 1px solid var(--kx-line);
+}
+
+.kx-rules h3 {
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.kx-rules p {
+  color: var(--kx-muted);
+  line-height: 1.5;
+  font-size: 0.95rem;
+}
+
+.kx-bounty-status {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 28px var(--pad) 0;
+  padding: 10px 14px;
+  border-radius: 12px;
+  box-shadow: inset 0 0 0 1px var(--kx-line);
+  color: var(--kx-muted);
+  font-size: 0.92rem;
+}
+
+.kx-bounty-status .kx-dot {
+  margin-top: 0.5em;
+}
+
+.kx-dot-wait {
+  background: var(--kx-found);
+  box-shadow: 0 0 0 3px rgb(238 106 44 / 0.16);
+}
+
+/* ---------- Run it yourself ---------- */
+
+.kx-verify {
+  padding: clamp(72px, 10vw, 140px) 0 0;
+}
+
+.kx-code {
+  margin: clamp(24px, 3vw, 36px) var(--pad) 0;
+  border-radius: 16px;
+  background: #090b06;
+  box-shadow: inset 0 0 0 1px var(--kx-line);
+  overflow: hidden;
+}
+
+.kx-code-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--kx-line);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--kx-faint);
+}
+
+.kx-code pre {
+  /* a terminal scrolls sideways rather than break a command */
+  white-space: pre;
+  overflow-x: auto;
+  padding: 18px 20px;
+  color: #ddd8c8;
+  font-size: 0.86rem;
+  line-height: 1.8;
+}
+
+/* ---------- Final call ---------- */
+
+.kx-final {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr);
+  align-items: center;
+  gap: clamp(16px, 3vw, 48px);
+  min-height: 86vh;
+  padding: clamp(72px, 10vw, 120px) var(--pad);
+}
+
+.kx-final-copy {
+  display: grid;
+  gap: 30px;
+}
+
+.kx-final h2 {
+  font-size: clamp(3rem, 7vw, 7rem);
+}
+
+.kx-final .slot {
+  max-width: 560px;
+}
+
+.kx-final-stage {
+  height: 56vh;
+}
+
+/* ---------- Footer, with the wordmark the page ends on ---------- */
+
+.kx-footer {
+  display: grid;
+  gap: 20px;
+  padding: 0 var(--pad) 34px;
+  border-top: 1px solid var(--kx-line);
+  overflow: hidden;
+}
+
+.kx-wordmark {
+  margin: 0 -0.04em;
+  font-size: clamp(8rem, 30vw, 28rem);
+  font-weight: 800;
+  letter-spacing: -0.07em;
+  line-height: 0.8;
+  color: transparent;
+  -webkit-text-stroke: 1px rgb(239 232 214 / 0.16);
+  user-select: none;
+}
+
+.kx-footer-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.kx-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 22px;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.kx-footer-links a {
+  color: var(--kx-muted);
+  text-decoration: none;
+  transition: color 200ms var(--ease-out);
+}
+
+.kx-footer-links a:hover {
+  color: var(--kx-text);
+}
+
+.kx-fine {
+  font-size: 0.85rem;
+  color: var(--kx-faint);
+}
+
+/* ---------- Reveals: each section arrives once, from below ---------- */
+
+@media (prefers-reduced-motion: no-preference) {
+  /* the twins run into the one report, then it checks */
+  .kx [data-reveal] .kx-twins path {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    transition: stroke-dashoffset 900ms var(--ease-out) calc(400ms + var(--t, 0) * 120ms);
+  }
+
+  .kx [data-reveal] .kx-twins .kx-twins-check {
+    transition-delay: 1100ms;
+  }
+
+  .kx [data-reveal].is-in .kx-twins path {
+    stroke-dashoffset: 0;
+  }
+
+  /* from an already-visible state: a fast scroll never meets an empty space */
+  .kx [data-reveal] {
+    opacity: 0.25;
+    transform: translateY(16px);
+    transition:
+      opacity 900ms var(--ease-out) calc(var(--i, 0) * 80ms),
+      transform 1100ms var(--ease-out) calc(var(--i, 0) * 80ms);
+  }
+
+  /* the terminal writes itself out, left to right */
+  .kx-code[data-reveal] pre {
+    clip-path: inset(0 100% 0 0);
+    transition: clip-path 1300ms var(--ease-out) 250ms;
+  }
+
+  .kx-code[data-reveal].is-in pre {
+    clip-path: inset(0);
+  }
+
+  .kx [data-reveal].is-in {
+    opacity: 1;
+    transform: none;
+  }
+
+  .kx-row {
+    animation: kx-up 520ms var(--ease-out) calc(var(--i, 0) * 35ms) both;
+  }
+}
+
+/* ---------- Narrow screens for the new sections ---------- */
+
+@media (max-width: 980px) {
+  .kx-dots {
+    display: none;
+  }
+
+  .kx-section-head {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .kx-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .kx-stat:nth-child(3) {
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .kx-stat:nth-child(n + 3) {
+    border-top: 1px solid var(--kx-line);
+  }
+
+  .kx-story {
+    height: 460vh;
+  }
+
+  .kx-story-sticky {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+    align-content: start;
+    padding-top: 64px;
+    gap: 8px;
+  }
+
+  .kx-story-stage {
+    order: -1;
+    height: 26vh;
+  }
+
+  .kx-panels {
+    min-height: 330px;
+  }
+
+  .kx-bento {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .kx-tile-wide {
+    grid-column: auto;
+  }
+
+  .kx-rules {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .kx-rules li:nth-child(3) {
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .kx-final {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .kx-final-stage {
+    order: -1;
+    height: 34vh;
+  }
+}
+
+@media (max-width: 640px) {
+  .kx-row {
+    grid-template-columns: repeat(3, auto) minmax(0, 1fr);
+    gap: 6px 14px;
+  }
+
+  .kx-row-name {
+    grid-column: 1 / -1;
+  }
+
+  .kx-row-head,
+  .kx-row-time {
+    display: none;
+  }
+
+  .kx-rules {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .kx-rules li + li {
+    padding-left: 0;
+    border-left: 0;
+    border-top: 1px solid var(--kx-line);
+  }
+
+  .kx-steps li {
+    font-size: 0.8rem;
+  }
+
+  .kx-story h2 {
+    font-size: 2.1rem;
+  }
+
+  .kx-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    margin-inline: calc(var(--pad) * -1);
+    padding-inline: var(--pad);
+  }
+
+  .kx-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .kx-tab {
+    flex: none;
+  }
+
+  .kx-footer-links {
+    display: grid;
+    grid-template-columns: repeat(3, auto);
+    justify-content: start;
+    gap: 12px 28px;
+  }
+
+  .kx-specimen .kx-specimen-sub {
+    -webkit-line-clamp: 3;
+  }
+
+}
+
+@media (max-width: 1100px) {
+  .kx-row-clock {
+    display: none;
+  }
+}

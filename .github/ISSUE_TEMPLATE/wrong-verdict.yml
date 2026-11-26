@@ -1,0 +1,25 @@
+name: A verdict looks wrong
+description: A claim was stamped proven, found or unclear, and you think the evidence says otherwise.
+labels: [verdict]
+body:
+  - type: input
+    id: address
+    attributes:
+      label: Contract address
+      placeholder: 0x...
+    validations:
+      required: true
+  - type: input
+    id: claim
+    attributes:
+      label: Claim id
+      placeholder: V2_sweep
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: What the check proves, and what the words say
+      description: If you can show a break of a proven claim, report it privately instead. It may be worth a bounty.
+    validations:
+      required: true

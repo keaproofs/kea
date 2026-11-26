@@ -1,0 +1,16 @@
+name: Bug
+description: Something in the engine, the API or the site does not work.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what you expected
+    validations:
+      required: true
+  - type: textarea
+    id: how
+    attributes:
+      label: How to reproduce it
+    validations:
+      required: true

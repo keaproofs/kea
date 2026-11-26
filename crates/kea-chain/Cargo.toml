@@ -1,0 +1,19 @@
+[package]
+name = "kea-chain"
+description = "A small JSON-RPC client and account reading for Robinhood Chain"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+alloy-primitives.workspace = true
+reqwest.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+
+[lints]
+workspace = true

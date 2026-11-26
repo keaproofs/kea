@@ -1,0 +1,294 @@
+/* Kea: porcelain, olive and vermilion. Every colour here comes from the approved brand. */
+
+@font-face {
+  font-family: "Schibsted Grotesk";
+  src: url("/fonts/SchibstedGrotesk-var.ttf") format("truetype");
+  font-weight: 400 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Reddit Mono";
+  src: url("/fonts/RedditMono-400.ttf") format("truetype");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Reddit Mono";
+  src: url("/fonts/RedditMono-500.ttf") format("truetype");
+  font-weight: 500;
+  font-display: swap;
+}
+
+:root {
+  /* Kea, dark: the porcelain mark lit on an olive-black ground. */
+  --kx-ground: #0c0e08;
+  --kx-panel: #14170f;
+  --kx-line: rgb(239 232 214 / 0.09);
+  --kx-text: #f3eee2;
+  --kx-muted: #aaa792;
+  --kx-faint: #8f8c77;
+  --kx-proven: #b8c45e;
+  --kx-proven-fill: #7d8a31;
+  --kx-found: #ee6a2c;
+  --kx-vermilion: #e5512b;
+  --sans: "Schibsted Grotesk", system-ui, sans-serif;
+  --mono: "Reddit Mono", ui-monospace, monospace;
+  /* past 1440px wide the content stops growing, so every line stays readable and header, sections and footer
+     keep one edge */
+  --pad: max(clamp(20px, 5vw, 72px), calc((100vw - 1296px) / 2));
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--kx-ground);
+  color: var(--kx-text);
+  font-family: var(--sans);
+  font-size: 100%;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  scrollbar-color: #2b2f1d var(--kx-ground);
+}
+
+body {
+  margin: 0;
+  font-size: 1.0625rem;
+  line-height: 1.55;
+  caret-color: var(--kx-vermilion);
+}
+
+h1,
+h2,
+h3 {
+  font-weight: 800;
+  line-height: 1.04;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+  margin: 0;
+}
+
+p {
+  margin: 0;
+  text-wrap: pretty;
+}
+
+a {
+  color: inherit;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.22em;
+  text-decoration-color: var(--kx-vermilion);
+}
+
+a:hover {
+  text-decoration-color: currentColor;
+}
+
+::selection {
+  background: var(--kx-vermilion);
+  color: var(--kx-ground);
+}
+
+:focus-visible {
+  outline: 2px solid var(--kx-found);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.mono {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+pre {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* ---------- The ask form ---------- */
+
+.slot {
+  max-width: 600px;
+}
+
+.slot-row {
+  display: flex;
+  gap: 6px;
+  padding: 6px;
+  border-radius: 14px;
+  background: var(--kx-panel);
+  box-shadow: inset 0 0 0 1px var(--kx-line);
+}
+
+.slot-row:focus-within {
+  box-shadow: inset 0 0 0 1px var(--kx-proven);
+}
+
+.slot-input,
+.slot-question input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: var(--kx-text);
+  font-family: var(--mono);
+  font-size: 1rem;
+  padding: 12px;
+}
+
+.slot-input::placeholder,
+.slot-question input::placeholder {
+  color: var(--kx-faint);
+}
+
+.slot-input:focus-visible,
+.slot-question input:focus-visible {
+  outline: none;
+}
+
+.slot-button {
+  border: 0;
+  border-radius: 10px;
+  padding: 0 22px;
+  background: var(--kx-vermilion);
+  color: #fff8ee;
+  font-family: var(--sans);
+  font-weight: 800;
+  font-size: 1.2rem;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  transition: background 160ms var(--ease-out), transform 160ms var(--ease-out);
+}
+
+.slot-button:hover {
+  /* deeper, not lighter: the label keeps its contrast */
+  background: #cc521f;
+}
+
+.slot-button:disabled {
+  cursor: progress;
+  background: #4b5030;
+}
+
+.slot-more {
+  margin-top: 12px;
+  border: 0;
+  background: none;
+  padding: 4px 0;
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--kx-muted);
+  text-decoration: underline;
+  text-decoration-color: var(--kx-vermilion);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.3em;
+  cursor: pointer;
+}
+
+.slot-question {
+  margin-top: 12px;
+  display: grid;
+  gap: 6px;
+}
+
+.slot-question label {
+  font-weight: 600;
+  font-size: 0.92rem;
+  color: var(--kx-muted);
+}
+
+.slot-question input {
+  font-family: var(--sans);
+  background: var(--kx-panel);
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 1px var(--kx-line);
+}
+
+.slot-status {
+  margin-top: 12px;
+  min-height: 1.5em;
+  font-size: 0.92rem;
+  color: var(--kx-muted);
+}
+
+.slot-status-error {
+  color: var(--kx-found);
+  font-weight: 600;
+}
+
+.slot-status-waiting {
+  color: var(--kx-proven);
+  font-weight: 600;
+}
+
+/* ---------- Copy ---------- */
+
+.copy {
+  border: 0;
+  border-radius: 8px;
+  padding: 8px 12px;
+  background: var(--kx-text);
+  color: var(--kx-ground);
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: background 180ms var(--ease-out), transform 160ms var(--ease-out);
+}
+
+.copy:active,
+.slot-button:active {
+  transform: scale(0.97);
+}
+
+/* ---------- Changing page: the old one fades out as the new one rises in ---------- */
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(root) {
+  animation: 220ms var(--ease-out) both kx-page-out;
+}
+
+::view-transition-new(root) {
+  animation: 520ms var(--ease-out) 60ms both kx-page-in;
+}
+
+@keyframes kx-page-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes kx-page-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+.copy:hover {
+  background: #fff;
+}
