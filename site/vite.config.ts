@@ -12,6 +12,8 @@ const proxy = { "/v1": api, "/badge": api, "/feed": api, "/feed.xml": api };
 
 export default defineConfig({
   plugins: [react()],
+  // The 3D scene ships as one chunk the page loads after its first paint.
+  build: { chunkSizeWarningLimit: 650 },
   server: { port: 5173, strictPort: true, proxy },
   preview: { port: 5173, strictPort: true, proxy },
 });

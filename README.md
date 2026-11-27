@@ -1,5 +1,7 @@
 # Kea
 
+![Kea, an AI proof lab for Robinhood Chain: every contract, taken apart](docs/assets/header.png)
+
 [![CI](https://github.com/keaproofs/kea/actions/workflows/ci.yml/badge.svg)](https://github.com/keaproofs/kea/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/keaproofs/kea/actions/workflows/codeql.yml/badge.svg)](https://github.com/keaproofs/kea/actions/workflows/codeql.yml)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/keaproofs/kea/badge)](https://scorecard.dev/viewer/?uri=github.com/keaproofs/kea)
@@ -87,6 +89,7 @@ kea prove <address> --claims result.json --test Proof.t.sol
 | `site/` | The website (React, Vite, TypeScript) |
 | `contracts/` | The bounty pool, fee splitter and burner, with Kea's own proofs of them and the deploy script |
 | `ops/keeper/` | The keeper that sweeps, splits and burns the fees every hour |
+| `docs/` | The [API](docs/api.md) and the [contracts](docs/contracts.md): roles, money path and what is proven |
 
 ## Build
 

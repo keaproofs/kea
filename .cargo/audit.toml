@@ -2,6 +2,7 @@
 [advisories]
 ignore = [
   "RUSTSEC-2026-0387", # crypto-bigint: only through elliptic-curve, an optional dependency no Kea crate enables; never compiled.
+  "RUSTSEC-2026-0543", # chrono: only through serde_with's optional chrono feature, which no Kea crate enables; never compiled.
   "RUSTSEC-2024-0388", # derivative: only through ark-ff, an optional dependency of ruint no Kea crate enables; never compiled.
   "RUSTSEC-2024-0436", # paste: a compile-time macro alloy-primitives uses; unmaintained, not vulnerable.
 ]

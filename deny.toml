@@ -4,6 +4,7 @@
 # Any advisory fails CI unless it is listed here with the reason it cannot reach Kea.
 ignore = [
   { id = "RUSTSEC-2026-0387", reason = "crypto-bigint comes only through elliptic-curve, an optional dependency no Kea crate enables; it is never compiled." },
+  { id = "RUSTSEC-2026-0543", reason = "chrono comes only through serde_with's optional chrono feature, which no Kea crate enables; it is never compiled." },
   { id = "RUSTSEC-2024-0388", reason = "derivative comes only through ark-ff, an optional dependency of ruint no Kea crate enables; it is never compiled." },
   { id = "RUSTSEC-2024-0436", reason = "paste is a compile-time macro alloy-primitives uses; it is unmaintained, not vulnerable." },
 ]
