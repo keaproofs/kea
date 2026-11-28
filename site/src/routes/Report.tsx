@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { ApiError, ask, checkedOn, report as readReport, short, type Claim, type Family, type Report, type Status } from "../api";
 import { AskSlot } from "../components/AskSlot";
-import { Footer, Header } from "../components/Chrome";
+import { CABar, Footer, Header } from "../components/Chrome";
 import { Copy } from "../components/Copy";
 import { CountUp } from "../components/CountUp";
 import { BadgeRow, RerunBlock } from "../components/Proof";
@@ -53,6 +53,7 @@ export function ReportPage({ address }: { address: string }) {
 
   return (
     <div className="kx">
+      <CABar />
       <Header />
       <main id="main">
         {load.kind === "loading" && (

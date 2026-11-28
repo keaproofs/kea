@@ -24,3 +24,8 @@ Clippy runs with the pedantic set and zero warnings. Unsafe code is forbidden.
 ## Commits
 
 Write the reason in the message, not only the change: the log is the record of why Kea works the way it does.
+
+## Releases
+
+A maintainer sets the version in `Cargo.toml`, adds its section to `CHANGELOG.md` and pushes an annotated tag
+`v<version>`. The release workflow builds the binaries, signs their provenance and takes the notes from that section.

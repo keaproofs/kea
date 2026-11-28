@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { follow } from "../router";
 import { scrollToId } from "../smooth";
+import { CA } from "../token";
 
 const SECTIONS = [
   ["reports", "Reports"],
@@ -14,6 +16,30 @@ function go(event: React.MouseEvent<HTMLAnchorElement>, id: string) {
   scrollToId(id);
 }
 
+/** $KEA's contract address, first thing on every page once the token is live: in full, with one tap to copy. */
+export function CABar() {
+  const [copied, setCopied] = useState(false);
+  if (!CA) return null;
+  const copy = async () => {
+    await navigator.clipboard.writeText(CA).catch(() => undefined);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1600);
+  };
+  return (
+    <div className="kx-ca" role="region" aria-label="$KEA contract address">
+      <span className="kx-ca-live">
+        <span className="kx-dot" aria-hidden="true" />
+        $KEA is live
+      </span>
+      <span className="kx-ca-key">CA</span>
+      <code className="kx-ca-addr">{CA}</code>
+      <button type="button" className="kx-ca-copy" onClick={copy} aria-live="polite">
+        {copied ? "Copied" : "Copy CA"}
+      </button>
+    </div>
+  );
+}
+
 /** The header every page shares: mark, token chip, sections, network, and the one action. */
 export function Header() {
   return (
@@ -24,7 +50,7 @@ export function Header() {
       </a>
       <span className="kx-chip">
         <span className="kx-chip-key">$KEA</span>
-        <span>launching soon</span>
+        <span>{CA ? "live on Robinhood Chain" : "launching soon"}</span>
       </span>
       <nav className="kx-nav" aria-label="Sections">
         {SECTIONS.map(([id, label]) => (

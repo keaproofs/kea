@@ -1396,3 +1396,88 @@ a.kx-row:hover {
     display: none;
   }
 }
+
+/* ---------- $KEA's contract address: the first thing on every page once the token is live ---------- */
+
+.kx-ca {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 9px var(--pad);
+  background: #efe8d6;
+  color: #262a12;
+  font-size: 0.95rem;
+  box-shadow: 0 1px 0 rgb(38 42 18 / 0.25);
+}
+
+.kx-ca-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.kx-ca-key {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  color: #5a6524;
+}
+
+.kx-ca-addr {
+  font-family: var(--mono);
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: #262a12;
+  overflow-wrap: anywhere;
+  user-select: all;
+}
+
+.kx-ca-copy {
+  flex: none;
+  border: 0;
+  border-radius: 8px;
+  padding: 8px 14px;
+  background: #e5512b;
+  color: #fff;
+  font: 700 0.85rem var(--sans);
+  cursor: pointer;
+}
+
+.kx-ca-copy:active {
+  transform: scale(0.97);
+}
+
+@media (max-width: 560px) {
+  .kx-ca {
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 6px 10px;
+    padding: 8px 14px 10px;
+  }
+
+  .kx-ca-key {
+    display: none;
+  }
+
+  .kx-ca-addr {
+    order: 3;
+    flex-basis: 100%;
+    font-size: 0.8rem;
+  }
+}
+
+.kx-bounty-status a {
+  color: var(--kx-text);
+  font-family: var(--mono);
+  font-size: 0.92em;
+  text-decoration: underline;
+  text-decoration-color: var(--kx-vermilion);
+  text-underline-offset: 3px;
+}

@@ -47,10 +47,12 @@ enum Command {
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    // Arguments first, so `--help` and `--version` work before any setting or database exists.
+    let cli = Cli::parse();
     let config = config::Config::from_env()?;
     let store = store::Store::open(&config.db)?;
     let rpc = Rpc::new(config.rpc_url.clone());
-    match Cli::parse().command {
+    match cli.command {
         Some(Command::Import { dir }) => {
             let count = import(&store, &rpc, &dir).await?;
             println!("imported {count} reports");

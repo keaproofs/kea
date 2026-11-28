@@ -14,6 +14,8 @@ Kea answers plain-word questions about contracts deployed on Robinhood Chain wit
 
 Kea does not give opinions. Every verdict comes from a test file anyone can download and run.
 
+**$KEA** on Robinhood Chain: [`0xDA53a3D36F269397c9733f19b152172Ab8161839`](https://robin.etherscan.io/token/0xDA53a3D36F269397c9733f19b152172Ab8161839)
+
 ## A real report
 
 VaultV2 (`0x75999324313103e54540dc040050fc823e0ef4ef`), from Kea's model evaluation on 25 Nov 2026:
@@ -91,6 +93,18 @@ kea prove <address> --claims result.json --test Proof.t.sol
 | `ops/keeper/` | The keeper that sweeps, splits and burns the fees every hour |
 | `docs/` | The [API](docs/api.md) and the [contracts](docs/contracts.md): roles, money path and what is proven |
 
+## Install
+
+Every [release](https://github.com/keaproofs/kea/releases) carries static Linux binaries for x86_64 and aarch64.
+Before you run one, check the download and that GitHub built it from this repository:
+
+```
+sha256sum --ignore-missing -c SHA256SUMS
+gh attestation verify kea-<version>-<target>.tar.gz --repo keaproofs/kea
+```
+
+The binaries still call Foundry, halmos and GNU time, and need the test libraries listed under Build.
+
 ## Build
 
 You need:
@@ -149,7 +163,17 @@ after graduation in the token's own Uniswap v4 pool.
   - a release pays exactly 20/30/50 and keeps nothing;
   - the splitter's ETH reaches only the pool, the burner and the team.
 
-The addresses are published here once the contracts are deployed.
+The three contracts were deployed on 27 Nov 2026 and are verified on Sourcify; $KEA launched the same day with
+the splitter as its creator fee recipient.
+
+| | Address |
+| --- | --- |
+| $KEA | [`0xDA53a3D36F269397c9733f19b152172Ab8161839`](https://robin.etherscan.io/token/0xDA53a3D36F269397c9733f19b152172Ab8161839) |
+| FeeSplitter | [`0x58E11c14C3c2C0f2152b76F79c8C609B8273a2C0`](https://robin.etherscan.io/address/0x58E11c14C3c2C0f2152b76F79c8C609B8273a2C0) |
+| Burner | [`0x910b892f6A730B9FE3BC68b953E5494faaAa1d5a`](https://robin.etherscan.io/address/0x910b892f6A730B9FE3BC68b953E5494faaAa1d5a) |
+| BountyPool | [`0x90b570e9d42861fE3FD6ce19Fe6464Bb875D3319`](https://robin.etherscan.io/address/0x90b570e9d42861fE3FD6ce19Fe6464Bb875D3319) |
+| Team and judge, a 2-of-3 Safe | [`0xeB435a99fCDEd29DF806F9f505A0669d1403cA4B`](https://robin.etherscan.io/address/0xeB435a99fCDEd29DF806F9f505A0669d1403cA4B) |
+| Keeper | [`0x6b79990c20c4F5C913D4660cFFD26da6C8991b05`](https://robin.etherscan.io/address/0x6b79990c20c4F5C913D4660cFFD26da6C8991b05) |
 
 ## Checks
 

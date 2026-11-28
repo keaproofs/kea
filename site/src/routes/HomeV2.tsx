@@ -2,7 +2,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { recent, report as readReport, short, type Claim, type Job, type Listed, type Report } from "../api";
 import { AskSlot } from "../components/AskSlot";
 import { CardStrip } from "../components/CardStrip";
-import { Footer, Header } from "../components/Chrome";
+import { CABar, Footer, Header } from "../components/Chrome";
+import { EXPLORER, POOL, SPLITTER } from "../token";
 import { CountUp } from "../components/CountUp";
 import { KCanvas } from "../components/KCanvas";
 import { BadgeRow, RerunBlock } from "../components/Proof";
@@ -157,6 +158,7 @@ export function HomeV2() {
   return (
     <div className="kx">
       <KCanvas target={target} onFail={() => heroStage.current?.classList.add("kx-stage-flat")} />
+      <CABar />
       <Header />
       <SectionDots sections={SECTIONS} />
       <main>
@@ -360,9 +362,20 @@ export function HomeV2() {
             ))}
           </ol>
           <p className="kx-bounty-status" data-reveal>
-            <span className="kx-dot kx-dot-wait" aria-hidden="true" />
-            The pool deploys with $KEA. It has no pause and no upgrade, and it closes only after 30 days of public
-            notice, while every bounty still pays.
+            <span className="kx-dot" aria-hidden="true" />
+            {/* one span, so the flex row keeps the sentence and its links together */}
+            <span>
+            The pool is live at{" "}
+            <a href={`${EXPLORER}/address/${POOL}`} target="_blank" rel="noreferrer">
+              {POOL.slice(0, 6)}…{POOL.slice(-4)}
+            </a>
+            , funded through the fee splitter{" "}
+            <a href={`${EXPLORER}/address/${SPLITTER}`} target="_blank" rel="noreferrer">
+              {SPLITTER.slice(0, 6)}…{SPLITTER.slice(-4)}
+            </a>
+            . It has no pause and no upgrade, and it closes only after 30 days of public notice, while every bounty
+            still pays.
+            </span>
           </p>
         </section>
 
