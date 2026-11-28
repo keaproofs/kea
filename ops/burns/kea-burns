@@ -1,0 +1,285 @@
+#!/usr/bin/env python3
+# kea-burns: reads every $KEA buy-and-burn and fee release from Robinhood Chain into the JSON files behind
+# keaproofs.io/burn. kea-burns.timer runs it every minute. It holds no key: every address it reads is public.
+#
+#   burns.json     every Burned event on the burner, oldest first: n, block, t, tx, log, from, eth, kea, curve
+#   releases.json  every Released event on the fee splitter, oldest first: n, block, t, tx, log, pool, burner, team
+#   now.json       the chain at one snapshot block (`head`, LAG blocks behind the tip; `at` is its time), the totals,
+#                  and `updated`, when the run began
+#
+# Amounts are wei as decimal strings, times are unix seconds (UTC). Each file is replaced whole, and a failed read
+# exits 1 with the last good files left in place. Python 3, standard library only.
+#   kea-burns [--out DIR]    DIR defaults to /var/lib/kea-burns
+#   kea-burns --self-test    checks the decoding against two real events, offline
+import argparse
+import json
+import os
+import sys
+import time
+import urllib.error
+import urllib.request
+from decimal import Decimal
+
+RPC = "https://rpc.mainnet.chain.robinhood.com"
+AGENT = "kea-burns/0.1"  # Cloudflare answers Python-urllib's own User-Agent with a 403
+TOKEN = "0xDA53a3D36F269397c9733f19b152172Ab8161839"
+BURNER = "0x910b892f6A730B9FE3BC68b953E5494faaAa1d5a"
+SPLITTER = "0x58E11c14C3c2C0f2152b76F79c8C609B8273a2C0"
+CURVE = "0x6E5274c8Aa628B0559cCfa8B6772BB3BF8539354"
+ESCROW = "0xd3AFEB2a57f70eF218Aa82451c51B2fb0416Ac9e"  # the launchpad's fee escrow, the splitter's escrow()
+DEAD = "0x000000000000000000000000000000000000dEaD"
+DEV = "0xf61815d056797A7A85f1dA3B9A060F4e2a658B0F"  # the launch's creator wallet
+START = 124132097  # the splitter's deploy block; the burner was bound later, so neither has an older event
+WINDOW = 5_000_000  # one address-filtered eth_getLogs may span 10M blocks and return 10,000 logs
+# The RPC's address-filtered log index trails eth_blockNumber (by 1 to 43 blocks on 28 Nov, at ~8.65 blocks a second),
+# and answers [] for blocks it has not indexed. So the logs and every read are taken at one snapshot block LAG blocks
+# (~30 s) behind the tip, and each run rereads about an hour before the last snapshot: a log the index adds late is
+# still picked up, and the (tx, logIndex) de-dup makes the overlap free.
+LAG = 256
+RESCAN = 32_000
+# cast sig-event 'Burned(uint256,uint256,bool)' and cast sig-event 'Released(uint256,uint256,uint256)'
+BURNED = "0xf9c6a97103d2154225e16c044b1b52dd07fd8d7ba76e1efdf1cb6c9063ad5269"
+RELEASED = "0xf854feef4c325cc8fcfad1a693b62c4383c8d228c4ca0bc52f9e06095338a5f1"
+SELECTOR = {  # cast sig '<signature>'
+    "totalSupply()": "0x18160ddd", "balanceOf(address)": "0x70a08231", "token()": "0xfc0c546a",
+    "keeper()": "0xaced1661", "graduated()": "0xe7c2b772", "pool()": "0x16f0115b", "burner()": "0x27810b6e",
+    "team()": "0x85f2aef2", "creatorTaxBalance()": "0xdb2bd533", "quoteFeeBalance()": "0xed479c47",
+    "protocolFeeShareBps()": "0x9040f866", "buybackEnabled()": "0x160d0da5",
+}
+READS = [  # one batch at the snapshot block: name, contract, signature, argument
+    ("supply", TOKEN, "totalSupply()", None), ("dead", TOKEN, "balanceOf(address)", DEAD),
+    ("dev", TOKEN, "balanceOf(address)", DEV), ("burnerKea", TOKEN, "balanceOf(address)", BURNER),
+    ("token", BURNER, "token()", None), ("keeper", BURNER, "keeper()", None),
+    ("graduated", BURNER, "graduated()", None), ("pool", SPLITTER, "pool()", None),
+    ("burner", SPLITTER, "burner()", None), ("team", SPLITTER, "team()", None),
+    ("owed", ESCROW, "balanceOf(address)", SPLITTER), ("tax", CURVE, "creatorTaxBalance()", None),
+    ("fee", CURVE, "quoteFeeBalance()", None), ("protocolBps", CURVE, "protocolFeeShareBps()", None),
+    ("buyback", CURVE, "buybackEnabled()", None),
+]
+
+
+def post(body):
+    """One JSON-RPC POST. A 429, a 5xx or a dropped connection is retried after 2, 4 and 8 s."""
+    data = json.dumps(body).encode()
+    for wait in (2, 4, 8, 0):
+        try:
+            request = urllib.request.Request(RPC, data, {"Content-Type": "application/json", "User-Agent": AGENT})
+            with urllib.request.urlopen(request, timeout=30) as response:
+                return json.load(response)
+        except urllib.error.HTTPError as e:
+            if not wait or (e.code != 429 and e.code < 500):
+                raise
+        except OSError:
+            if not wait:
+                raise
+        time.sleep(wait)
+
+
+def batch(calls):
+    """Sends [(method, params)] in JSON-RPC batches of up to 100 and returns the results in order. Any error raises."""
+    results = []
+    for i in range(0, len(calls), 100):
+        chunk = calls[i:i + 100]
+        answer = post([{"jsonrpc": "2.0", "id": n, "method": m, "params": p} for n, (m, p) in enumerate(chunk)])
+        if not isinstance(answer, list):
+            raise RuntimeError(f"batch refused: {answer}")
+        by_id = {a.get("id"): a for a in answer}
+        for n, (method, params) in enumerate(chunk):
+            got = by_id.get(n, {})
+            if got.get("result") is None:
+                raise RuntimeError(f"{method} {json.dumps(params)}: {got.get('error', 'no answer')}")
+            results.append(got["result"])
+    return results
+
+
+def word(result):
+    """One uint or address from an eth_call. A getter that is not there reverts or answers 0x, and raises here."""
+    if len(result) != 66:
+        raise RuntimeError(f"expected one word, got {result!r}")
+    return int(result, 16)
+
+
+def address(result):
+    return "0x%040x" % word(result)  # lowercase: the standard library has no keccak for checksums
+
+
+def event(log, t):
+    data = log["data"][2:]
+    return ({"block": int(log["blockNumber"], 16), "t": t, "tx": log["transactionHash"].lower(),
+             "log": int(log["logIndex"], 16)}, [int(data[i:i + 64], 16) for i in (0, 64, 128)])
+
+
+def burn_row(log, t, sender):
+    row, (eth, kea, curve) = event(log, t)
+    return dict(row, **{"from": sender, "eth": str(eth), "kea": str(kea), "curve": curve == 1})
+
+
+def release_row(log, t):
+    row, (pool, burner, team) = event(log, t)
+    return dict(row, pool=str(pool), burner=str(burner), team=str(team))
+
+
+def merge(rows, new):
+    """Rows de-duplicated by (tx, logIndex), in chain order, numbered from 1."""
+    keyed = {(r["tx"], r["log"]): r for r in rows + new}
+    ordered = sorted(keyed.values(), key=lambda r: (r["block"], r["log"]))
+    return [{"n": n, **{k: v for k, v in r.items() if k != "n"}} for n, r in enumerate(ordered, 1)]
+
+
+def exact(r):
+    """The splitter's own math: 20% to the pool and 30% to the burner, each rounded down, the rest to the team."""
+    total = int(r["pool"]) + int(r["burner"]) + int(r["team"])
+    return int(r["pool"]) == total * 2000 // 10000 and int(r["burner"]) == total * 3000 // 10000
+
+
+def waiting(tax, fee, protocol_bps, owed, splitter_eth, burner_eth):
+    """ETH on its way to the burner before graduation, while the curve's buyback slice is off: 30% of the creator's
+    share of the curve's pending fees (the whole tax, and the fee less the protocol's cut, in the curve's own math), of
+    what the escrow owes the splitter and of what the splitter holds, plus what the burner already holds."""
+    return (tax + fee - fee * protocol_bps // 10000 + owed + splitter_eth) * 3000 // 10000 + burner_eth
+
+
+def load(path):
+    try:
+        with open(path) as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return None
+
+
+def write(path, text):
+    """tmp + fsync + os.replace, so a reader gets the old file or the new one, never half of one."""
+    tmp = os.path.join(os.path.dirname(path), "." + os.path.basename(path) + ".tmp")
+    with open(tmp, "w") as f:
+        f.write(text)
+        f.flush()
+        os.fsync(f.fileno())
+    os.replace(tmp, path)
+
+
+def compact(obj):
+    return json.dumps(obj, separators=(",", ":"))
+
+
+def ledger(rows):  # one row per line, so the raw file reads as a ledger
+    return "[\n" + ",\n".join(map(compact, rows)) + "\n]\n"
+
+
+def summed(rows, key):
+    return str(sum(int(r[key]) for r in rows))
+
+
+def run(out):
+    os.makedirs(out, exist_ok=True)
+    paths = {name: os.path.join(out, name + ".json") for name in ("burns", "releases", "now")}
+    old = {name: load(path) for name, path in paths.items()}
+    burns, releases = old["burns"] or [], old["releases"] or []
+    began = int(time.time())  # stamped before the reads, so retries never make the data look newer than it is
+    head = int(batch([("eth_blockNumber", [])])[0], 16) - LAG
+    # Pick up RESCAN blocks before the last head, or rebuild from the start when any file is missing.
+    start = max(START, (old["now"].get("head", 0) if None not in old.values() else 0) - RESCAN)
+    tag, calls = hex(head), []
+    for a in range(start, head + 1, WINDOW):
+        span = {"fromBlock": hex(a), "toBlock": hex(min(head, a + WINDOW - 1))}
+        calls += [("eth_getLogs", [dict(span, address=BURNER, topics=[BURNED])]),
+                  ("eth_getLogs", [dict(span, address=SPLITTER, topics=[RELEASED])])]
+    windows = len(calls)
+    calls += [("eth_call", [{"to": to, "data": SELECTOR[sig] + (arg[2:].lower().zfill(64) if arg else "")}, tag])
+              for _, to, sig, arg in READS]
+    calls += [("eth_getBalance", [BURNER, tag]), ("eth_getBalance", [SPLITTER, tag]),
+              ("eth_getBlockByNumber", [tag, False])]
+    answers = batch(calls)
+    logs = [log for found in answers[:windows] for log in found]
+    s = {name: answer for (name, *_), answer in zip(READS, answers[windows:])}
+    burner_eth, splitter_eth = (int(a, 16) for a in answers[-3:-1])
+    at = int(answers[-1]["timestamp"], 16)  # what the data covers: the page calls an hour missed only from this
+
+    # Block times and senders only for logs not already kept. The logs' own blockTimestamp is 0x0 on this RPC.
+    seen = {(r["tx"], r["log"]) for r in burns + releases}
+    new = [log for log in logs if (log["transactionHash"].lower(), int(log["logIndex"], 16)) not in seen]
+    blocks = sorted({int(log["blockNumber"], 16) for log in new})
+    txs = sorted({log["transactionHash"].lower() for log in new if log["topics"][0] == BURNED})
+    found = batch([("eth_getBlockByNumber", [hex(b), False]) for b in blocks] +
+                  [("eth_getTransactionByHash", [tx]) for tx in txs])
+    when = {b: int(f["timestamp"], 16) for b, f in zip(blocks, found)}
+    sender = {tx: f["from"].lower() for tx, f in zip(txs, found[len(blocks):])}
+    new_burns = [burn_row(log, when[int(log["blockNumber"], 16)], sender[log["transactionHash"].lower()])
+                 for log in new if log["topics"][0] == BURNED]
+    new_releases = [release_row(log, when[int(log["blockNumber"], 16)]) for log in new if log["topics"][0] == RELEASED]
+    if new_burns or old["burns"] is None:
+        burns = merge(burns, new_burns)
+        write(paths["burns"], ledger(burns))
+    if new_releases or old["releases"] is None:
+        releases = merge(releases, new_releases)
+        write(paths["releases"], ledger(releases))
+
+    keeper, graduated = address(s["keeper"]), word(s["graduated"]) != 0
+    tax, fee, bps, owed = (word(s[k]) for k in ("tax", "fee", "protocolBps", "owed"))
+    now = {
+        "v": 1, "updated": began, "head": head, "at": at,
+        "supply": str(word(s["supply"])), "dead": str(word(s["dead"])), "dev": str(word(s["dev"])),
+        "burner": {"eth": str(burner_eth), "kea": str(word(s["burnerKea"])), "token": address(s["token"]),
+                   "keeper": keeper, "graduated": graduated},
+        "splitter": {"eth": str(splitter_eth), "owed": str(owed),
+                     "payees": {k: address(s[k]) for k in ("pool", "burner", "team")}},
+        "curve": {"tax": str(tax), "fee": str(fee), "protocolBps": bps},
+        "totals": {"burns": len(burns), "kea": summed(burns, "kea"), "eth": summed(burns, "eth")},
+        "releases": {"n": len(releases), "pool": summed(releases, "pool"), "burner": summed(releases, "burner"),
+                     "team": summed(releases, "team"), "exact": sum(map(exact, releases))},
+        "keeperSent": sum(b["from"] == keeper for b in burns),
+        "latest": burns[-3:][::-1],
+    }
+    # After graduation the fees wait in the pool hook, which this job does not read. With the curve's buyback slice
+    # on, part of the fee would buy back elsewhere. Either way the figure would be wrong, so it is left out.
+    if not graduated and word(s["buyback"]) == 0:
+        now["waiting"] = str(waiting(tax, fee, bps, owed, splitter_eth, burner_eth))
+    write(paths["now"], compact(now) + "\n")
+    print(f"snapshot {head} (tip - {LAG}, {time.strftime('%H:%M:%S', time.gmtime(at))} UTC): read blocks {start}..{head} "
+          f"({max(0, head - start + 1)}), {len(new_burns)} new burns, "
+          f"{len(new_releases)} new releases; {len(burns)} burns and {len(releases)} releases in all")
+
+
+def self_test():
+    """The 28 Nov 10:00 UTC burn and release #1, as eth_getLogs returned them."""
+    burn = {"blockNumber": "0x7726f92", "logIndex": "0x8", "topics": [BURNED],
+            "transactionHash": "0xd3c5e45b1b54e6b8e86986aa0c93e4eee604c1b7b19f1d99819bc44691ce097e",
+            "data": "0x00000000000000000000000000000000000000000000000000a0b907d03278fc"
+                    "00000000000000000000000000000000000000000003916f5564b12c01949950"
+                    "0000000000000000000000000000000000000000000000000000000000000001"}
+    release = {"blockNumber": "0x76af1ce", "logIndex": "0x4", "topics": [RELEASED],
+               "transactionHash": "0x6c6d5d6836812f0c554e9b6f815697f73e848d2f36a36d93a11a6ebfd310e02e",
+               "data": "0x000000000000000000000000000000000000000000000000004a7bdb9fbaadcf"
+                       "000000000000000000000000000000000000000000000000006fb9c96f9804b7"
+                       "00000000000000000000000000000000000000000000000000ba35a50f52b288"}
+    keeper = "0x6b79990c20c4f5c913d4660cffd26da6c8991b05"
+    rows = merge(merge([], [burn_row(burn, 1795860028, keeper)]), [burn_row(burn, 1795860028, keeper)])
+    assert len(rows) == 1, "the same log read twice is one burn"
+    b = rows[0]
+    assert (b["n"], b["block"], b["t"], b["log"], b["curve"]) == (1, 124940178, 1795860028, 8, True), b
+    assert (b["eth"], b["kea"]) == ("45239439482583292", "4313574340689961298467152"), b
+    assert f"{Decimal(b['eth']).scaleb(-18):.16f}" == "0.0452394394825833"
+    assert f"{Decimal(b['kea']).scaleb(-18):,.2f}" == "4,313,574.34"
+    r = release_row(release, 1795803430)
+    assert (r["block"], r["pool"], r["burner"], r["team"]) == (
+        124449230, "20965331484454351", "31447997226681527", "52413328711135880"), r
+    assert exact(r) and not exact(dict(r, pool=str(int(r["pool"]) + 1)))
+    assert waiting(862959580822329, 431479790411164, 3000, 7281808744923895, 0, 0) == 2534041253710211
+    print("self-test ok: the 28 Nov 10:00 burn decodes to 0.0452394394825833 ETH for 4,313,574.34 KEA on the curve; "
+          "release #1 to 0.020965 / 0.031448 / 0.052413 ETH, split exactly")
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Reads the $KEA burns and fee releases for keaproofs.io/burn.")
+    parser.add_argument("--out", default="/var/lib/kea-burns", metavar="DIR", help="where the JSON files go")
+    parser.add_argument("--self-test", action="store_true", help="check the decoding against two real events, offline")
+    args = parser.parse_args()
+    if args.self_test:
+        return self_test()
+    try:
+        run(args.out)
+    except Exception as e:  # say why, keep the last good files, and let the next run try again
+        sys.exit(f"kea-burns: {type(e).__name__}: {e}")
+
+
+if __name__ == "__main__":
+    main()

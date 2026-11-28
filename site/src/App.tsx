@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { isAddress, report as readReport } from "./api";
+import { BurnPage } from "./routes/Burn";
 import { HomeV2 } from "./routes/HomeV2";
 import { ReportPage } from "./routes/Report";
 import { usePath } from "./router";
@@ -24,6 +25,7 @@ function useWarmReports() {
 export function App() {
   useWarmReports();
   const path = usePath();
+  if (/^\/burn\/?$/.test(path)) return <BurnPage />;
   const report = path.match(/^\/c\/(0x[0-9a-fA-F]{40})\/?$/);
   return report ? <ReportPage address={report[1].toLowerCase()} /> : <HomeV2 />;
 }

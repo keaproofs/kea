@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { millions, readChain } from "../burns";
 import { follow } from "../router";
 import { scrollToId } from "../smooth";
 import { CA } from "../token";
@@ -16,9 +17,33 @@ function go(event: React.MouseEvent<HTMLAnchorElement>, id: string) {
   scrollToId(id);
 }
 
+/** How much $KEA has been burned, for the CA bar's link to /burn: read once after the first paint, and left out if
+ * the burn ledger does not answer. /burn itself shows the full number, so it skips the read. */
+function useBurned(skip: boolean) {
+  const [burned, setBurned] = useState<string | null>(null);
+  useEffect(() => {
+    if (skip) return;
+    let live = true;
+    fetch("/data/now.json", { cache: "no-cache" })
+      .then((response) =>
+        // a missing file can come back as the site's index.html with a 200
+        response.ok && response.headers.get("content-type")?.includes("application/json")
+          ? response.json()
+          : Promise.reject(new Error(String(response.status))),
+      )
+      .then((body) => live && setBurned(millions(readChain(body).burned)))
+      .catch(() => undefined);
+    return () => {
+      live = false;
+    };
+  }, [skip]);
+  return skip ? null : burned;
+}
+
 /** $KEA's contract address, first thing on every page once the token is live: in full, with one tap to copy. */
 export function CABar() {
   const [copied, setCopied] = useState(false);
+  const burned = useBurned(!CA || /^\/burn\/?$/.test(location.pathname));
   if (!CA) return null;
   const copy = async () => {
     await navigator.clipboard.writeText(CA).catch(() => undefined);
@@ -36,6 +61,11 @@ export function CABar() {
       <button type="button" className="kx-ca-copy" onClick={copy} aria-live="polite">
         {copied ? "Copied" : "Copy CA"}
       </button>
+      {burned && (
+        <a className="kx-ca-burned" href="/burn" onClick={follow}>
+          {burned} burned<span aria-hidden="true"> →</span>
+        </a>
+      )}
     </div>
   );
 }
@@ -58,6 +88,9 @@ export function Header() {
             {label}
           </a>
         ))}
+        <a href="/burn" onClick={follow} aria-current={/^\/burn\/?$/.test(location.pathname) ? "page" : undefined}>
+          Burn
+        </a>
       </nav>
       <span className="kx-network">
         <span className="kx-dot" aria-hidden="true" />
@@ -87,6 +120,9 @@ export function Footer() {
               {label}
             </a>
           ))}
+          <a href="/burn" onClick={follow}>
+            Burn
+          </a>
           <a href="/feed.xml">Change feed</a>
         </nav>
       </div>

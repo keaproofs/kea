@@ -1084,6 +1084,12 @@ a.kx-row:hover {
   font-size: 0.92rem;
 }
 
+/* no words left alone on a line ("still pays."): a measure the box hugs, with balanced lines */
+.kx-bounty-status > span:not(.kx-dot) {
+  max-width: 72ch;
+  text-wrap: balance;
+}
+
 .kx-bounty-status .kx-dot {
   margin-top: 0.5em;
 }
@@ -1454,12 +1460,37 @@ a.kx-row:hover {
   transform: scale(0.97);
 }
 
-@media (max-width: 560px) {
+/* "34.5M burned", linking /burn: it arrives after the first paint, with the number */
+.kx-ca-burned {
+  flex: none;
+  font-weight: 700;
+  white-space: nowrap;
+  color: #262a12;
+  text-decoration: underline 2px #e5512b;
+  text-underline-offset: 4px;
+}
+
+.kx-ca-burned:hover {
+  text-decoration-color: currentColor;
+}
+
+.kx-ca-burned span {
+  color: #e5512b;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .kx-ca-burned {
+    animation: kx-fade 500ms var(--ease-out) both;
+  }
+}
+
+/* Two rows up to 860px: under about 830px the address, Copy CA and the burned link no longer share one row */
+@media (max-width: 860px) {
   .kx-ca {
     flex-wrap: wrap;
     justify-content: space-between;
     gap: 6px 10px;
-    padding: 8px 14px 10px;
+    padding: 8px var(--pad) 10px;
   }
 
   .kx-ca-key {
@@ -1471,6 +1502,24 @@ a.kx-row:hover {
     flex-basis: 100%;
     font-size: 0.8rem;
   }
+
+  /* first row: "$KEA is live", the burned link, then Copy CA at the right; it fits at 360px */
+  .kx-ca-burned {
+    order: 1;
+    font-size: 0.8rem;
+  }
+
+  .kx-ca-burned::before {
+    content: "·";
+    display: inline-block;
+    margin-right: 6px;
+    color: #5a6524;
+  }
+
+  .kx-ca-copy {
+    order: 2;
+    margin-left: auto;
+  }
 }
 
 .kx-bounty-status a {
@@ -1480,4 +1529,15 @@ a.kx-row:hover {
   text-decoration: underline;
   text-decoration-color: var(--kx-vermilion);
   text-underline-offset: 3px;
+}
+
+/* the fee's other share, on its own line: the burner's 30%, with the way to /burn */
+.kx-bounty-burn {
+  display: block;
+  margin-top: 6px;
+}
+
+.kx-bounty-status .kx-bounty-burn a {
+  font-family: inherit;
+  font-size: inherit;
 }

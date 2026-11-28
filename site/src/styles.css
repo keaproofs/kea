@@ -115,6 +115,11 @@ a:hover {
   white-space: nowrap;
 }
 
+/* the browser sets code in its own monospace; every terminal here is Reddit Mono */
+code {
+  font-family: var(--mono);
+}
+
 pre {
   margin: 0;
   font-family: var(--mono);

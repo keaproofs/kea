@@ -1,0 +1,24 @@
+# kea-burns reads the KEA burns and fee releases from the chain into /var/lib/kea-burns, which nginx serves at /data/.
+# It holds no key and reads nothing in /etc/kea: every address it reads is public.
+#
+# Install, as root:
+#   useradd --system --no-create-home --shell /usr/sbin/nologin kea-burns
+#   install -m 0755 kea-burns /usr/local/bin/kea-burns
+#   install -m 0644 kea-burns.service kea-burns.timer /etc/systemd/system/
+#   systemctl daemon-reload && systemctl enable --now kea-burns.timer
+# Not DynamicUser: its state directory would sit under /var/lib/private (0700), which nginx cannot read.
+[Unit]
+Description=Kea burns: read every KEA burn and fee release for keaproofs.io/burn
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=kea-burns
+ExecStart=/usr/local/bin/kea-burns
+StateDirectory=kea-burns
+StateDirectoryMode=0755
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+NoNewPrivileges=yes

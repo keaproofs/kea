@@ -24,18 +24,23 @@ export function useSmoothScroll() {
   }, []);
 }
 
-/** Scrolls to a section, gliding when smooth scrolling is on. */
-export function scrollToId(id: string) {
+/** Scrolls to a section, gliding when smooth scrolling is on. "center" puts the element in the middle of the window,
+ * clear of the sticky CA bar: for a row rather than a section. */
+export function scrollToId(id: string, block: "start" | "center" = "start") {
   const element = document.getElementById(id);
   if (!element) return;
   if (!lenis) {
-    element.scrollIntoView(); // no smooth scroller means the reader asked for less motion
+    element.scrollIntoView({ block }); // no smooth scroller means the reader asked for less motion
     return;
   }
+  const box = element.getBoundingClientRect();
+  const offset = block === "center" ? (window.innerHeight - box.height) / 2 : 12;
   // The scroller keeps its own idea of where the page is. A native scroll it has not caught yet (focus pulling a
   // link into view, say) would make it start and aim from there, so it catches up first and aims from the page.
+  // It also measures the page's height late: rows added a moment ago would cap the glide short of them.
+  lenis.resize();
   lenis.scrollTo(window.scrollY, { immediate: true, force: true });
-  lenis.scrollTo(element.getBoundingClientRect().top + window.scrollY - 12, { duration: 1.4 });
+  lenis.scrollTo(box.top + window.scrollY - offset, { duration: 1.4 });
 }
 
 /** Marks `[data-reveal]` elements as they enter the window, once, so CSS can bring them in. */

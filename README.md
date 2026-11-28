@@ -91,6 +91,7 @@ kea prove <address> --claims result.json --test Proof.t.sol
 | `site/` | The website (React, Vite, TypeScript) |
 | `contracts/` | The bounty pool, fee splitter and burner, with Kea's own proofs of them and the deploy script |
 | `ops/keeper/` | The keeper that sweeps, splits and burns the fees every hour |
+| `ops/burns/` | The job that reads every burn from the chain for keaproofs.io/burn |
 | `docs/` | The [API](docs/api.md) and the [contracts](docs/contracts.md): roles, money path and what is proven |
 
 ## Install
@@ -148,6 +149,9 @@ The bounty pool pays people who break a claim Kea published as proven. It has no
 
 The burner turns its share of the fees into $KEA and burns it. Before graduation it buys on the bonding curve, and
 after graduation in the token's own Uniswap v4 pool.
+
+Every burn, live: https://keaproofs.io/burn
+
 - Its ETH can go nowhere else. Everything it buys is burned in the same call.
 - The keeper burns on a schedule and sets the fewest tokens it accepts, so a burn can't be wrapped in trades that move
   the price first.

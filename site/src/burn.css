@@ -1,0 +1,2094 @@
+/* /burn: the approved Day N recap still, live. Left: the headline, the burned total, its stats and proof lines.
+   Right: the chart panel. Tokens, the live pill, the line clip and the keyframes come from styles.css and home.css. */
+
+/* the header's current page: ivory with the vermilion rule */
+.kx-nav a[aria-current="page"] {
+  color: var(--kx-text);
+  text-decoration: underline 2px var(--kx-vermilion);
+  text-underline-offset: 0.5em;
+}
+
+.kb-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 0.94fr) minmax(0, 1.06fr);
+  gap: 48px;
+  padding: 40px var(--pad);
+}
+
+/* The hero owns the first screen: the window less the CA bar (51px) and the header (72px) above it, with the content
+   centred in it as on the still, so the footer starts below the fold. A window shorter than the content just scrolls. */
+@media (min-width: 981px) {
+  .kb-hero {
+    min-height: calc(100svh - 123px);
+    align-content: center;
+  }
+}
+
+.kb-copy {
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+/* ---------- The live pill ---------- */
+
+.kb-live-dot {
+  position: relative;
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--kx-proven);
+}
+
+.kb-live-dot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1.5px var(--kx-proven);
+  opacity: 0;
+}
+
+.kb-stale {
+  color: var(--kx-found);
+}
+
+/* ---------- Headline, total, sub line ---------- */
+
+.kb-title {
+  margin-top: 24px;
+  /* one line at any day number: the column is the size container */
+  font-size: min(4.6rem, calc(100cqi / (var(--chars) * 0.45)));
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  line-height: 1;
+}
+
+.kb-total {
+  margin-top: 0.28em;
+  /* --em is the number's width in em, so the widest total still fits the column */
+  font-size: min(8rem, calc(100cqi / var(--em)));
+  font-weight: 800;
+  /* the tightest tracking at which no two of the 100 digit pairs touch: at -0.015em "44" still joins */
+  letter-spacing: -0.01em;
+  line-height: 1;
+  color: var(--kx-vermilion);
+  font-variant-numeric: tabular-nums;
+}
+
+.kb-od {
+  display: flex;
+  height: 0.92em;
+}
+
+.kb-col {
+  display: block;
+  height: 1em;
+  /* widened by padding and pulled back by margin, so no glyph edge is cut at the sides */
+  padding: 0 0.15em;
+  margin: 0 -0.15em;
+  /* one digit's window with soft edges: a digit rolling past them fades instead of being cut. A settled digit's
+     ink (0.15em to 0.87em of the cell) sits inside the opaque band. */
+  mask-image: linear-gradient(transparent, #000 0.12em, #000 0.9em, transparent);
+}
+
+/* a comma only rises in once, and its tail reaches below the band: a plain window, a little past the box */
+.kb-col.kb-punct {
+  mask-image: none;
+  clip-path: inset(-0.06em 0 -0.12em);
+}
+
+.kb-strip,
+.kb-strip > span {
+  display: block;
+  height: 1em;
+}
+
+/* Schibsted's tabular comma, point and colon are a full digit wide: digits stay tabular, so a strip or a ticking
+   countdown keeps its width, and the punctuation stays narrow, as on the still */
+.kb-punct {
+  font-variant-numeric: normal;
+}
+
+.kb-total-text {
+  display: block;
+  height: 0.92em;
+}
+
+/* the sub line and the stats scale with the column, as the total does, so they keep the still's proportions */
+.kb-sub {
+  margin-top: 14px;
+  font-size: clamp(1.15rem, 5.2cqi, 1.9rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+/* ---------- Stats, between hairlines as on the still ---------- */
+
+/* the column's full width, so the spaces between the stats have room to be their full size */
+.kb-stats {
+  display: flex;
+  align-self: stretch;
+  margin-top: 40px;
+}
+
+.kb-stat {
+  flex: none;
+}
+
+/* the hairline between two stats, centred in a space of 80px that gives way, down to 28px, before the row would
+   outgrow its column (three-figure burns beside "keeper run · watching") */
+.kb-stat-rule {
+  display: flex;
+  justify-content: center;
+  flex: 0 1 80px;
+  min-width: 28px;
+}
+
+.kb-stat-rule::before {
+  content: "";
+  width: 1px;
+  background: var(--kx-line);
+}
+
+.kb-stat-value {
+  font-size: clamp(1.75rem, 8.7cqi, 3.2rem);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.kb-stat-label {
+  margin-top: 12px;
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--kx-muted);
+}
+
+/* ---------- The run line and the proof lines ---------- */
+
+.kb-run {
+  margin-top: 30px;
+  font-family: var(--mono);
+  font-size: 0.9rem;
+  color: var(--kx-muted);
+}
+
+.kb-run b {
+  font-weight: 500;
+  color: var(--kx-text);
+}
+
+/* a clause after a middle dot; on a phone it takes its own line instead (as does .kb-then, a second sentence) */
+.kb-more::before {
+  content: " · ";
+  white-space: pre;
+}
+
+/* a phrase that moves to the next line whole, rather than breaking inside its link */
+.kb-nowrap {
+  white-space: nowrap;
+}
+
+.kb-proof {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 3px 18px;
+  margin: 22px 0 0;
+  font-family: var(--mono);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--kx-muted);
+}
+
+.kb-proof > div {
+  display: contents;
+}
+
+.kb-proof dt {
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--kx-text);
+}
+
+.kb-proof dd {
+  margin: 0;
+}
+
+.kb-proof a {
+  color: inherit;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: color 200ms var(--ease-out);
+}
+
+.kb-proof a:hover {
+  color: var(--kx-text);
+}
+
+.kb-proof-more {
+  display: block;
+}
+
+/* a long label takes its own line, so it never widens the label column of the lines above it */
+.kb-proof-wide dt {
+  grid-column: 1 / -1;
+}
+
+.kb-proof-wide dd {
+  grid-column: 2;
+}
+
+.kb-share {
+  margin-top: 26px;
+  padding: 9px 15px;
+  border-radius: 10px;
+  background: var(--kx-text);
+  color: var(--kx-ground);
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: background 180ms var(--ease-out), transform 160ms var(--ease-out);
+}
+
+.kb-share:hover {
+  background: #fff;
+}
+
+.kb-share:active {
+  transform: scale(0.97);
+}
+
+/* ---------- The chart panel ---------- */
+
+.kb-panel {
+  /* the latest rows fit themselves to the panel's own width */
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 30px 34px 26px;
+  border-radius: 20px;
+  background: linear-gradient(180deg, #181b12, #0f110a);
+  box-shadow: inset 0 0 0 1px var(--kx-line);
+}
+
+.kb-head {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--kx-muted);
+}
+
+/* the chart takes the panel's spare height, so the panel ends level with the column beside it */
+.kb-chart {
+  position: relative;
+  flex: 1 0 auto;
+  min-height: clamp(240px, 30vh, 320px);
+  margin-top: 18px;
+}
+
+.kb-chart > svg {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+}
+
+.kb-chart text {
+  font-family: var(--mono);
+  font-size: 12px;
+  fill: var(--kx-faint);
+}
+
+.kb-chart .kb-date {
+  fill: var(--kx-muted);
+}
+
+.kb-grid {
+  stroke: rgb(239 232 214 / 0.07);
+}
+
+.kb-base {
+  stroke: rgb(239 232 214 / 0.16);
+}
+
+.kb-tick {
+  stroke: rgb(239 232 214 / 0.25);
+}
+
+.kb-now {
+  stroke: rgb(239 232 214 / 0.3);
+  stroke-dasharray: 2 4;
+}
+
+.kb-line {
+  fill: none;
+  stroke: var(--kx-vermilion);
+  stroke-width: 3;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.kb-dot,
+.kb-ring {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+circle.kb-dot {
+  fill: var(--kx-vermilion);
+  stroke: #0f110a;
+  stroke-width: 3;
+}
+
+.kb-ring {
+  fill: none;
+  stroke: var(--kx-vermilion);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+  opacity: 0;
+}
+
+/* the newest dot's pulse: a 1px ring the size of the dot, centred on it (its left and top are inline). Scaling
+   thickens it to about the chart's 1.5px while it is still visible. */
+.kb-pulse {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  border: 1px solid var(--kx-vermilion);
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.kb-hair {
+  stroke: rgb(239 232 214 / 0.28);
+}
+
+.kb-hit {
+  fill: transparent;
+  cursor: pointer;
+}
+
+.kb-tip {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 2;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #14170f;
+  box-shadow: inset 0 0 0 1px var(--kx-line);
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  line-height: 1.55;
+  white-space: nowrap;
+  color: var(--kx-muted);
+  pointer-events: none;
+}
+
+.kb-tip b {
+  font-weight: 500;
+  color: var(--kx-text);
+}
+
+/* a tap, or a mouse resting on a burn, holds the tooltip: it then takes the pointer, so its link can be used */
+.kb-tip.is-held {
+  pointer-events: auto;
+}
+
+.kb-tip-go {
+  color: var(--kx-text);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+/* ---------- Latest burns ---------- */
+
+.kb-latest {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--kx-line);
+}
+
+.kb-latest ol {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.kb-row + .kb-row {
+  border-top: 1px solid rgb(239 232 214 / 0.06);
+}
+
+.kb-row a {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 28px;
+  padding: 11px 0;
+  font-family: var(--mono);
+  font-size: 1rem;
+  line-height: 1.2;
+  color: var(--kx-muted);
+  text-decoration: none;
+}
+
+/* every cell stays on one line, so the rows keep one height */
+.kb-row a > span {
+  white-space: nowrap;
+}
+
+.kb-row-kea {
+  text-align: right;
+  color: var(--kx-text);
+}
+
+/* a panel too narrow for the whole row keeps only the arrow of the transaction: the whole row links to it */
+@container (max-width: 440px) {
+  .kb-row-hash {
+    display: none;
+  }
+}
+
+.kb-row-tx {
+  transition: color 200ms var(--ease-out);
+}
+
+.kb-row a:hover .kb-row-tx {
+  color: var(--kx-text);
+}
+
+/* ---------- The sections under the hero ---------- */
+
+.kb-sec {
+  padding-top: clamp(72px, 10vw, 140px);
+}
+
+.kb-sec:last-child {
+  padding-bottom: clamp(72px, 10vw, 140px);
+}
+
+/* a data page: section heads a size under the home page's, so the hero's headline and total lead */
+.kb .kx-section-head h2,
+.kb .kb-v-head h2 {
+  font-size: clamp(2.2rem, 4vw, 3.6rem);
+}
+
+/* One column: the hero's own bottom space already parts it from the ledger. On a wide screen the hero centres its
+   content in the first screen, so a tall window leaves room under Share on X; the ledger adds only what that room
+   lacks of the usual section gap. 540px - 50svh is that lack: none at 1080 tall (about 140px of room), 90px at 900. */
+.kb-hero + .kb-sec {
+  padding-top: 0;
+}
+
+@media (min-width: 981px) {
+  .kb-hero + .kb-sec {
+    padding-top: clamp(0px, 540px - 50svh, clamp(72px, 10vw, 140px) - 40px);
+  }
+}
+
+/* ---------- S2: every burn, with its receipt ---------- */
+
+.kb-l {
+  margin: clamp(24px, 3vw, 36px) var(--pad) 0;
+}
+
+.kb-l-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px 24px;
+  padding: 0 12px 14px;
+  font-family: var(--mono);
+  font-size: 0.86rem;
+  color: var(--kx-muted);
+}
+
+.kb-l-tools b {
+  font-weight: 500;
+  color: var(--kx-text);
+}
+
+.kb-l-tools a,
+.kb-l-eth a,
+.kb-l-tx a {
+  color: var(--kx-muted);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: color 200ms var(--ease-out);
+}
+
+.kb-l-tools a {
+  color: var(--kx-text);
+}
+
+/* a column of receipts: the arrow marks each link, the underline comes on hover, as on the hero's latest rows */
+.kb-l-eth a,
+.kb-l-tx a {
+  text-decoration-line: none;
+}
+
+.kb-l-eth a:hover,
+.kb-l-tx a:hover {
+  color: var(--kx-text);
+  text-decoration-line: underline;
+}
+
+.kb-l-table {
+  border-top: 1px solid var(--kx-line);
+}
+
+/* one burn: #, time, the bar and the KEA, ETH in, where it bought, the transaction */
+.kb-l-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 56px 190px minmax(0, 1fr) 140px 120px 170px;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--kx-line);
+  font-family: var(--mono);
+  font-size: 0.86rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--kx-muted);
+  transition: background-color 200ms var(--ease-out);
+}
+
+.kb-l-row:not(.kb-l-head):hover {
+  background-color: rgb(239 232 214 / 0.03);
+}
+
+.kb-l-row > span {
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.kb-l-head {
+  min-height: 40px;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--kx-faint);
+}
+
+.kb-l-n {
+  color: var(--kx-faint);
+}
+
+/* the bar takes the column's spare width, so the amounts line up beside the ETH column */
+.kb-l-kea {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-right: 28px;
+}
+
+.kb-l-bar {
+  flex: 1 1 auto;
+  height: 4px;
+  border-radius: 2px;
+  background: rgb(239 232 214 / 0.08);
+  overflow: hidden;
+}
+
+.kb-l-bar > span {
+  display: block;
+  height: 100%;
+  background: var(--kx-vermilion);
+  transform-origin: left;
+}
+
+.kb-l-amount {
+  flex: none;
+  min-width: 11ch;
+  text-align: right;
+  color: var(--kx-text);
+}
+
+.kb-l-eth {
+  padding-right: 28px;
+  text-align: right;
+}
+
+.kb-l-tx {
+  text-align: right;
+}
+
+.kb-l-chip {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 1px rgb(239 232 214 / 0.14);
+  font-size: 0.78rem;
+  color: var(--kx-muted);
+}
+
+/* the phone's forms of a cell */
+.kb-l-narrow {
+  display: none;
+}
+
+/* a burn day: from 18:00 UTC, with its own sums */
+.kb-l-band > span {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 2px 24px;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--kx-line);
+  background: rgb(239 232 214 / 0.025);
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--kx-muted);
+}
+
+.kb-l-more {
+  margin-top: 18px;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  box-shadow: inset 0 0 0 1px rgb(239 232 214 / 0.18);
+  color: var(--kx-text);
+  font: 700 0.9rem var(--sans);
+  cursor: pointer;
+  transition: box-shadow 200ms var(--ease-out), transform 160ms var(--ease-out);
+}
+
+.kb-l-more:hover {
+  box-shadow: inset 0 0 0 1px rgb(239 232 214 / 0.36);
+}
+
+.kb-l-more:active {
+  transform: scale(0.97);
+}
+
+@media (max-width: 1099px) {
+  .kb-l-row {
+    grid-template-columns: 190px minmax(0, 1fr) 140px 120px 170px;
+  }
+
+  .kb-l-n {
+    display: none;
+  }
+}
+
+/* Under 980px the bar leaves the KEA cell for the row's bottom edge, as on a phone, so five columns still fit */
+@media (max-width: 979px) {
+  .kb-l-row {
+    grid-template-columns: minmax(124px, 1.2fr) minmax(92px, 1fr) minmax(80px, 0.8fr) minmax(76px, 0.7fr) minmax(112px, 1fr);
+  }
+
+  .kb-l-kea {
+    justify-content: flex-end;
+  }
+
+  .kb-l-bar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 3px;
+    border-radius: 0;
+    background: none;
+  }
+
+  .kb-l-amount {
+    min-width: 0;
+  }
+}
+
+/* A phone: two lines a burn. Its time with the chip, then its KEA with the ETH, which links the transaction. */
+@media (max-width: 640px) {
+  .kb-l-tools {
+    padding: 0 0 12px;
+    font-size: 0.8rem;
+  }
+
+  /* the column names stay for screen readers */
+  .kb-l-head {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    min-height: 0;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .kb-l-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "time on"
+      "kea eth";
+    gap: 6px 12px;
+    padding: 12px 10px 14px;
+  }
+
+  .kb-l-n,
+  .kb-l-tx,
+  .kb-l-wide {
+    display: none;
+  }
+
+  .kb-l-narrow {
+    display: inline;
+  }
+
+  .kb-l-time {
+    grid-area: time;
+  }
+
+  .kb-l-on {
+    grid-area: on;
+    justify-self: end;
+  }
+
+  .kb-l-kea {
+    grid-area: kea;
+    justify-content: flex-start;
+    padding: 0;
+  }
+
+  .kb-l-amount {
+    font-size: 1rem;
+    text-align: left;
+  }
+
+  .kb-l-eth {
+    grid-area: eth;
+    padding: 0;
+  }
+
+  .kb-l-band > span {
+    flex-direction: column;
+    padding: 9px 10px;
+    letter-spacing: 0.08em;
+  }
+}
+
+/* ---------- S3: where the ETH comes from ---------- */
+
+.kb-f {
+  margin: clamp(24px, 3vw, 36px) var(--pad) 0;
+  padding: 28px 32px;
+  border-radius: 20px;
+  background: linear-gradient(180deg, #171a11, #11130c);
+  box-shadow: inset 0 0 0 1px var(--kx-line);
+}
+
+/* row 1: trades pay the creator fee into the splitter */
+.kb-f-in {
+  display: flex;
+  align-items: center;
+}
+
+.kb-f-node {
+  border-radius: 12px;
+  background: rgb(239 232 214 / 0.03);
+  box-shadow: inset 0 0 0 1px rgb(239 232 214 / 0.14);
+}
+
+.kb-f-trades {
+  flex: none;
+  padding: 12px 18px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* an arrow with its label over it; it stands up on narrow screens */
+.kb-f-fee {
+  position: relative;
+  flex: none;
+  width: 132px;
+  height: 1px;
+  margin: 0 10px;
+  background: rgb(239 232 214 / 0.3);
+}
+
+.kb-f-fee::after,
+.kb-f-fan > span::after {
+  content: "";
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-right: 1px solid rgb(239 232 214 / 0.45);
+  border-bottom: 1px solid rgb(239 232 214 / 0.45);
+}
+
+.kb-f-fee::after {
+  right: 0;
+  top: -3px;
+  transform: rotate(-45deg);
+}
+
+.kb-f-fee span,
+.kb-f-release {
+  position: absolute;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  color: var(--kx-faint);
+}
+
+.kb-f-fee span {
+  left: 50%;
+  bottom: 8px;
+  transform: translateX(-50%);
+}
+
+.kb-f-splitter {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 24px;
+  padding: 14px 18px;
+}
+
+/* the stem from the splitter down to where its release fans out to the three payees */
+.kb-f-splitter::after {
+  content: "";
+  position: absolute;
+  left: 28px;
+  top: 100%;
+  width: 1px;
+  height: 24px;
+  background: rgb(239 232 214 / 0.3);
+}
+
+.kb-f-release {
+  left: 40px;
+  top: calc(100% + 5px);
+}
+
+.kb-f-name {
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.kb-f-name a,
+.kb-f-label a {
+  color: var(--kx-muted);
+  font-family: var(--mono);
+  font-weight: 400;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: color 200ms var(--ease-out);
+}
+
+.kb-f-name a {
+  margin-left: 4px;
+  font-size: 0.86rem;
+}
+
+.kb-f-name a:hover,
+.kb-f-label a:hover {
+  color: var(--kx-text);
+}
+
+.kb-f-sum {
+  margin-top: 2px;
+  font-family: var(--mono);
+  font-size: 0.86rem;
+  color: var(--kx-muted);
+}
+
+.kb-f-sum b,
+.kb-f-eth b {
+  font-weight: 500;
+  color: var(--kx-text);
+}
+
+/* a narrow node wraps the counts under the words, so the chip is a box, not a pill */
+.kb-f-chip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 1px var(--kx-line);
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--kx-muted);
+  text-decoration: none;
+  transition: box-shadow 200ms var(--ease-out);
+}
+
+.kb-f-chip:hover {
+  box-shadow: inset 0 0 0 1px rgb(239 232 214 / 0.28);
+}
+
+.kb-f-counts {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0 10px;
+}
+
+.kb-f-counts b {
+  font-weight: 500;
+}
+
+/* a payee column too narrow for the three counts on one line takes them one per line, in every column alike */
+@media (min-width: 981px) and (max-width: 1399px) {
+  .kb-f-report .kb-f-counts {
+    flex-direction: column;
+    gap: 2px;
+    line-height: 1.5;
+  }
+}
+
+.kb-f-zero {
+  color: var(--kx-faint);
+}
+
+/* rows 2 and 3: the split, what each payee was paid, and the burner's share burned */
+.kb-f-split {
+  display: grid;
+  grid-template-columns: 20fr 30fr 50fr;
+  grid-template-areas:
+    "fan fan fan"
+    "s1 s2 s3"
+    "l1 l2 l3"
+    ". burn burn";
+  column-gap: 4px;
+}
+
+/* every release fans out to the three payees: a hairline across, and an arrow down into each segment */
+.kb-f-fan {
+  grid-area: fan;
+  position: relative;
+  display: grid;
+  grid-template-columns: 20fr 30fr 50fr;
+  column-gap: 4px;
+  height: 42px;
+}
+
+.kb-f-fan::before {
+  content: "";
+  position: absolute;
+  top: 24px;
+  left: 16px;
+  right: calc((100% - 8px) * 0.5 - 16px);
+  height: 1px;
+  background: rgb(239 232 214 / 0.3);
+}
+
+.kb-f-fan > span {
+  position: relative;
+}
+
+.kb-f-fan > span::before {
+  content: "";
+  position: absolute;
+  left: 16px;
+  top: 24px;
+  bottom: 3px;
+  width: 1px;
+  background: rgb(239 232 214 / 0.3);
+}
+
+.kb-f-fan > span::after {
+  left: 13px;
+  bottom: 4px;
+  transform: rotate(45deg);
+}
+
+.kb-f-seg {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 64px;
+  padding: 0 16px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* the fill is its own layer, so it can grow from the left without squeezing the figure */
+.kb-f-seg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--fill);
+  transform-origin: left;
+}
+
+.kb-f-seg span {
+  position: relative;
+  font-weight: 800;
+  font-size: 1.4rem;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.kb-f-seg-pool {
+  grid-area: s1;
+  --fill: rgb(239 232 214 / 0.09);
+}
+
+.kb-f-seg-burner {
+  grid-area: s2;
+  --fill: var(--kx-vermilion);
+  color: #fff8ee;
+}
+
+.kb-f-seg-team {
+  grid-area: s3;
+  --fill: rgb(239 232 214 / 0.05);
+}
+
+/* each payee hangs from its segment on a hairline; the burner's is the vermilion line that runs on to the burn */
+.kb-f-label {
+  position: relative;
+  min-width: 0;
+  padding: 16px 8px 18px 32px;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  line-height: 1.75;
+  color: var(--kx-muted);
+}
+
+.kb-f-label::before {
+  content: "";
+  position: absolute;
+  left: 16px;
+  top: 14px;
+  bottom: 0;
+  width: 1px;
+  background: rgb(239 232 214 / 0.14);
+}
+
+.kb-f-label-pool {
+  grid-area: l1;
+}
+
+.kb-f-label-burner {
+  grid-area: l2;
+}
+
+.kb-f-label-burner::before {
+  left: 15.5px;
+  width: 1.5px;
+  background: var(--kx-vermilion);
+}
+
+.kb-f-label-team {
+  grid-area: l3;
+}
+
+.kb-f-who {
+  margin-bottom: 2px;
+  font-weight: 500;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--kx-text);
+}
+
+.kb-f-report {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+/* on its own line in every column, so a narrow column and a wide one read the same */
+.kb-f-report-key {
+  display: block;
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--kx-faint);
+  transition: color 200ms var(--ease-out);
+}
+
+.kb-f-report:hover .kb-f-report-key {
+  color: var(--kx-text);
+}
+
+/* --indent: from the column's edge to the node; the burner's line runs at 16px and turns in */
+.kb-f-burn {
+  --indent: 44px;
+  grid-area: burn;
+  padding-left: var(--indent);
+}
+
+.kb-f-burned {
+  position: relative;
+  margin-top: 14px;
+  padding: 16px 20px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgb(229 81 43 / 0.1), rgb(229 81 43 / 0.03));
+  box-shadow: inset 0 0 0 1px rgb(229 81 43 / 0.24);
+  font-weight: 700;
+  font-size: 1.2rem;
+  letter-spacing: -0.01em;
+}
+
+/* the burner's line turns into the node */
+.kb-f-burned::before {
+  content: "";
+  position: absolute;
+  right: 100%;
+  bottom: 50%;
+  width: calc(var(--indent) - 16px);
+  height: calc(50% + 14px);
+  border-left: 1.5px solid var(--kx-vermilion);
+  border-bottom: 1.5px solid var(--kx-vermilion);
+  border-bottom-left-radius: 10px;
+}
+
+.kb-f-burned b {
+  font-weight: 800;
+  color: var(--kx-vermilion);
+}
+
+/* a node too narrow for one line breaks after the number, never inside "in 17 burns, on the curve" */
+.kb-f-how {
+  white-space: nowrap;
+}
+
+.kb-f-dot {
+  color: var(--kx-muted);
+}
+
+.kb-f-wait {
+  margin-top: 10px;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  color: var(--kx-muted);
+}
+
+.kb-f-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 16px var(--pad) 0;
+  font-family: var(--mono);
+  font-size: 0.86rem;
+  color: var(--kx-muted);
+}
+
+.kb-f-check svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: var(--kx-proven);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.kb-f-check-key {
+  font-weight: 500;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--kx-proven);
+}
+
+.kb-f-check[data-differs] svg {
+  stroke: var(--kx-found);
+}
+
+.kb-f-check[data-differs] .kb-f-check-key {
+  color: var(--kx-found);
+}
+
+/* At 980px and below the split stacks: one row a payee, each with its own proportional bar, and the burn under the
+   burner's row */
+@media (max-width: 980px) {
+  .kb-f-in {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .kb-f-trades {
+    align-self: flex-start;
+  }
+
+  .kb-f-fee {
+    width: 1px;
+    height: 44px;
+    margin: 0 0 0 16px;
+  }
+
+  .kb-f-fee::after {
+    right: auto;
+    top: auto;
+    left: -3px;
+    bottom: 1px;
+    transform: rotate(45deg);
+  }
+
+  .kb-f-fee span {
+    left: 14px;
+    bottom: auto;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .kb-f-splitter::after {
+    left: 16px;
+    height: 44px;
+  }
+
+  .kb-f-release {
+    left: 30px;
+    top: calc(100% + 14px);
+  }
+
+  .kb-f-split {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "s1" "l1" "s2" "l2" "burn" "s3" "l3";
+    margin-top: 44px;
+  }
+
+  .kb-f-fan {
+    display: none;
+  }
+
+  .kb-f-seg {
+    height: 48px;
+    padding: 0 12px;
+    box-shadow: inset 0 0 0 1px var(--kx-line);
+  }
+
+  /* the figure fits inside a 20% fill down to 360px */
+  .kb-f-seg span {
+    font-size: 1.15rem;
+  }
+
+  .kb-f-seg::before {
+    right: auto;
+    width: calc(var(--share) * 1%);
+  }
+
+  .kb-f-label {
+    padding: 14px 0 20px 32px;
+  }
+
+  .kb-f-burn {
+    padding-bottom: 24px;
+  }
+}
+
+/* a tablet's stacked rows are wide: each payee's facts run on one or two lines rather than a narrow column */
+@media (min-width: 561px) and (max-width: 980px) {
+  .kb-f-label {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 22px;
+  }
+
+  .kb-f-who {
+    margin-bottom: 0;
+  }
+
+  .kb-f-report-key {
+    display: inline;
+    margin-right: 8px;
+  }
+}
+
+/* A burn that arrives live slides in under a vermilion wash that fades, its bar grows, and every bar rescales to the
+   new largest burn. On reveal the split's segments grow from the left, 80ms apart. */
+@media (prefers-reduced-motion: no-preference) {
+  .kb-l-row.is-new,
+  .kb-l-band.is-new {
+    animation:
+      kb-l-in 700ms var(--ease-out) backwards,
+      kb-wash 2.4s var(--ease-out) backwards;
+  }
+
+  .kb-l-row.is-new .kb-l-bar > span {
+    animation: kb-grow 900ms var(--ease-out) 150ms backwards;
+  }
+
+  .kb-l-bar > span {
+    transition: transform 600ms var(--ease-out);
+  }
+
+  .kb-f .kb-f-seg::before {
+    transform: scaleX(0);
+    transition: transform 1100ms var(--ease-out) calc(250ms + var(--i) * 80ms);
+  }
+
+  .kb-f .kb-f-seg span {
+    opacity: 0;
+    transition: opacity 600ms var(--ease-out) calc(700ms + var(--i) * 80ms);
+  }
+
+  .kb-f.is-in .kb-f-seg::before {
+    transform: none;
+  }
+
+  .kb-f.is-in .kb-f-seg span {
+    opacity: 1;
+  }
+}
+
+@keyframes kb-l-in {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+}
+
+@keyframes kb-wash {
+  from {
+    background-color: rgb(229 81 43 / 0.1);
+  }
+}
+
+@keyframes kb-grow {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@media (max-width: 560px) {
+  .kb-f {
+    padding: 20px 16px;
+    border-radius: 18px;
+  }
+
+  .kb-f-burn {
+    --indent: 36px;
+  }
+
+  .kb-f-burned {
+    padding: 14px 16px;
+    font-size: 1.15rem;
+  }
+
+  .kb-f-what,
+  .kb-f-how {
+    display: block;
+  }
+
+  .kb-f-what {
+    font-size: 1rem;
+  }
+
+  .kb-f-dot {
+    display: none;
+  }
+
+  /* the same Schibsted as the wide one-line node, wrapping where it must */
+  .kb-f-how {
+    margin-top: 2px;
+    font-size: 1rem;
+    white-space: normal;
+  }
+
+  .kb-f-check {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    font-size: 0.8rem;
+  }
+}
+
+/* ---------- S4: our own contracts went first ---------- */
+
+/* Each report as the report page draws it, as wide as the page: its verdict panel, then its claim cards, each with
+   what the chain shows today beside it. */
+.kb-p {
+  display: grid;
+  gap: 56px;
+  margin: clamp(24px, 3vw, 36px) var(--pad) 0;
+}
+
+.kb-p-sk {
+  min-height: 360px;
+  border-radius: 20px;
+}
+
+/* the name and where it lives on the left, the counts and their bar on the right */
+.kb-p-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 22px clamp(24px, 4vw, 64px);
+  padding: clamp(20px, 2.4vw, 28px);
+  border-radius: 20px;
+  background: linear-gradient(180deg, #171a11, #11130c);
+  box-shadow: inset 0 0 0 1px var(--kx-line);
+}
+
+.kb-p-id {
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+}
+
+.kb-p-id h3 {
+  margin-bottom: 4px;
+  font-size: clamp(1.9rem, 3vw, 2.8rem);
+  letter-spacing: -0.045em;
+  line-height: 1;
+}
+
+.kb-p-id a {
+  font-family: var(--mono);
+  font-size: 0.86rem;
+  color: var(--kx-muted);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: color 200ms var(--ease-out);
+}
+
+.kb-p-id a:hover {
+  color: var(--kx-text);
+}
+
+/* the report's own "Checked" line: taken apart before the 18:00 UTC launch */
+.kb-p-id p {
+  color: var(--kx-muted);
+  font-size: 0.92rem;
+}
+
+.kb-p-tally {
+  display: grid;
+  gap: 18px;
+}
+
+.kb-p-bar {
+  height: 10px;
+}
+
+.kb-p .kr-claims {
+  margin-top: 10px;
+}
+
+/* a wide card: the verdict word, the claim, and the chain's reading in its own column */
+.kb-p .kr-claim {
+  grid-template-columns: 76px minmax(0, 1fr) minmax(0, 400px);
+  column-gap: 16px;
+}
+
+/* a claim with no reading takes the whole width */
+.kb-p .kr-claim-body:last-child {
+  grid-column: 2 / -1;
+}
+
+/* the 3px verdict edge at each card's left: proven fill, vermilion for the power found, ivory 16% for unclear */
+.kb-p .kr-claim::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: rgb(239 232 214 / 0.16);
+}
+
+.kb-p .kr-claim-proven::before {
+  background: var(--kx-proven-fill);
+}
+
+.kb-p .kr-claim-found::before {
+  background: var(--kx-vermilion);
+}
+
+/* beside a proof, past a hairline: what the chain shows today, and whether that agrees */
+.kb-p-live {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  margin-left: 12px;
+  padding-left: 24px;
+  border-left: 1px solid var(--kx-line);
+}
+
+.kb-p-live-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  /* one line of the claim beside it (1.15rem at 1.3), so the two read level */
+  min-height: 1.495rem;
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--kx-faint);
+}
+
+.kb-p-verdict {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--kx-proven);
+}
+
+.kb-p-verdict svg,
+.kb-v-ok svg {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.kb-p-live[data-differs] .kb-p-verdict {
+  color: var(--kx-found);
+}
+
+.kb-p-value {
+  font-family: var(--mono);
+  font-size: 0.86rem;
+  color: var(--kx-text);
+}
+
+.kb-p-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  margin-top: 18px;
+}
+
+.kb-p-links a,
+.kb-v-links a {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--kx-text);
+}
+
+.kb-p-down {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: clamp(24px, 3vw, 36px) var(--pad) 0;
+  color: var(--kx-muted);
+}
+
+/* ---------- S5: don't trust the page, run it ---------- */
+
+/* the approved release still's composition: the porcelain K on the left, the head and the terminal on the right */
+.kb-v {
+  display: grid;
+  /* wide enough at 1296px for the totalSupply command on one line */
+  grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.25fr);
+  align-items: center;
+  gap: clamp(24px, 3.4vw, 48px);
+  padding-left: var(--pad);
+  padding-right: var(--pad);
+}
+
+/* a size container: without WebGL the approved render stands in, centred, as large as the stage allows */
+.kb-v-stage {
+  container-type: size;
+  height: 56vh;
+}
+
+.kb-v-stage.kx-stage-flat {
+  display: grid;
+  place-items: center;
+}
+
+.kb-v-stage .kx-stage-fallback {
+  width: min(100cqw, 100cqh, 460px);
+  margin: 0;
+}
+
+.kb-v-main {
+  min-width: 0;
+}
+
+.kb-v-head {
+  display: grid;
+  gap: 16px;
+}
+
+.kb-v-head p {
+  max-width: 48ch;
+  color: var(--kx-muted);
+  font-size: 1.1rem;
+  line-height: 1.5;
+}
+
+.kb-v .kx-code {
+  container-type: inline-size;
+  margin: clamp(24px, 3vw, 32px) 0 0;
+}
+
+.kb-v .kx-code-head {
+  flex-wrap: wrap;
+  gap: 4px 16px;
+}
+
+.kb-v-route {
+  margin-right: auto;
+  white-space: nowrap;
+}
+
+/* the release still's orange stamp: when the browser read the chain */
+.kb-v-stamp {
+  color: var(--kx-found);
+  letter-spacing: 0.04em;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+/* a narrower terminal names less of the route; its first command already says where it goes */
+@container (max-width: 700px) {
+  .kb-v-host {
+    display: none;
+  }
+}
+
+@container (max-width: 440px) {
+  .kb-v-from {
+    display: none;
+  }
+}
+
+/* the job's longer stamp, when the browser could not read: a line of its own under the label and Copy */
+@container (max-width: 520px) {
+  .kb-v-stamp-job {
+    order: 1;
+    flex-basis: 100%;
+  }
+}
+
+/* A command too long for its line goes on under itself, past the prompt, breaking only between its words. The
+   longest word is 42 characters (an address, or RH= and the RPC), 44 with its indent: a narrow terminal sets its text
+   small enough for that to fit (Reddit Mono's figures are 0.5625em wide), so no word is ever broken. */
+.kb-v .kx-code pre {
+  white-space: pre-wrap;
+  overflow-x: visible;
+  font-size: min(0.86rem, calc((100cqi - 40px) / 25));
+}
+
+.kb-v-cmd,
+.kb-v-out {
+  display: block;
+}
+
+.kb-v-cmd {
+  padding-left: 2ch;
+  text-indent: -2ch;
+}
+
+.kb-v-ps {
+  color: var(--kx-vermilion);
+}
+
+.kb-v-out {
+  color: var(--kx-text);
+}
+
+/* cast dims its exponent hint */
+.kb-v-hint,
+.kb-v-wait {
+  color: var(--kx-faint);
+}
+
+.kb-v-check {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 18px;
+  padding: 14px 20px 16px;
+  border-top: 1px solid var(--kx-line);
+  font-family: var(--mono);
+  font-size: 0.86rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--kx-text);
+}
+
+.kb-v-ok {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--kx-proven);
+  white-space: nowrap;
+}
+
+.kb-v-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  margin-top: 20px;
+}
+
+.kb-v-foot {
+  margin-top: 12px;
+  max-width: 62ch;
+  text-wrap: balance;
+  color: var(--kx-faint);
+  font-size: 0.9rem;
+}
+
+.kb-v-foot .mono {
+  color: var(--kx-muted);
+}
+
+/* the bar's segments grow from the left as their panel comes in, 80ms apart */
+@media (prefers-reduced-motion: no-preference) {
+  .kb-p-bar > span {
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 1100ms var(--ease-out) calc(350ms + var(--i, 0) * 80ms);
+  }
+
+  .kb-p-panel.is-in .kb-p-bar > span {
+    transform: none;
+  }
+}
+
+/* One column: each report whole, then the next; the K stands over the terminal, as the home page's last stage does */
+@media (max-width: 980px) {
+  .kb-p {
+    gap: 44px;
+  }
+
+  .kb-p-panel {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* the chain's reading goes under the claim, past a hairline */
+  .kb-p .kr-claim {
+    grid-template-columns: 76px minmax(0, 1fr);
+  }
+
+  .kb-p-live {
+    grid-column: 2;
+    margin: 8px 0 0;
+    padding: 10px 0 0;
+    border-left: 0;
+    border-top: 1px solid var(--kx-line);
+  }
+
+  .kb-p-live-head {
+    min-height: 0;
+  }
+
+  .kb-v {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .kb-v-stage {
+    height: 30vh;
+  }
+}
+
+@media (max-width: 560px) {
+  /* the verdict word over the claim, as on the report page */
+  .kb-p .kr-claim {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .kb-p .kr-claim-body:last-child,
+  .kb-p-live {
+    grid-column: 1;
+  }
+
+  .kb-v .kx-code pre {
+    padding: 16px;
+    font-size: min(0.78rem, calc((100cqi - 32px) / 25));
+  }
+
+  .kb-v-check {
+    padding: 12px 16px 14px;
+    font-size: 0.78rem;
+  }
+
+  /* one link a line: a phone would otherwise break the three as two and one */
+  .kb-v-links {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* ---------- Loading, and a ledger that does not answer ---------- */
+
+/* short, so the footer's wordmark fills the rest of the window rather than bare ground */
+.kb-wait {
+  min-height: 44vh;
+  padding: clamp(40px, 6vw, 72px) var(--pad);
+  color: var(--kx-muted);
+  font-size: 1.1rem;
+}
+
+.kb-wait a {
+  color: var(--kx-text);
+}
+
+/* the site's alert slab: found orange at 8% inside a 28% ring, led by the waiting dot */
+.kb-down {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 12px;
+  max-width: 64ch;
+  padding: 14px 18px;
+  border-radius: 14px;
+  background: rgb(238 106 44 / 0.08);
+  box-shadow: inset 0 0 0 1px rgb(238 106 44 / 0.28);
+  color: var(--kx-text);
+  line-height: 1.5;
+}
+
+.kb-down .kx-dot {
+  margin-top: 0.6em;
+}
+
+/* ---------- The opening: the hero builds itself, then the burns replay ---------- */
+
+@media (prefers-reduced-motion: no-preference) {
+  .kb .kx-ca {
+    animation: kx-fade 700ms var(--ease-out) both;
+  }
+
+  .kb-reading {
+    animation: kx-fade 600ms var(--ease-out) 600ms both;
+  }
+
+  .kb-live-dot::after {
+    animation: kb-ring 2.4s var(--ease-out) infinite;
+  }
+
+  .kb-panel {
+    animation: kx-up 900ms var(--ease-out) 300ms both;
+  }
+
+  /* No label before its number: the caption rises as the total starts to roll (REPLAY, 700ms, in Burn.tsx), and
+     the stats, run line, proof lines and Share follow it 80ms apart */
+  .kb-sub {
+    animation: kx-up 800ms var(--ease-out) 700ms both;
+  }
+
+  .kb-stat,
+  .kb-stat-rule {
+    animation: kx-up 800ms var(--ease-out) calc(780ms + var(--i, 0) * 80ms) both;
+  }
+
+  .kb-run {
+    animation: kx-up 800ms var(--ease-out) 1020ms both;
+  }
+
+  .kb-proof {
+    animation: kx-up 800ms var(--ease-out) 1100ms both;
+  }
+
+  .kb-share {
+    animation: kx-up 800ms var(--ease-out) 1180ms both;
+  }
+
+  .kb-tip {
+    transition: transform 180ms var(--ease-out);
+  }
+
+  /* "Latest burns" and its hairline arrive with the rows, once the replay is over; the delay is inline */
+  .kb-latest {
+    animation: kx-fade 600ms var(--ease-out) backwards;
+  }
+
+  /* each burn's own step and dot land on its beat; the delays are inline */
+  .kb-seg.is-beat {
+    animation: kb-in 220ms var(--ease-out) backwards;
+  }
+
+  .kb-hist.is-beat {
+    animation: kb-in 300ms var(--ease-out) backwards;
+  }
+
+  .kb-dot.is-beat {
+    animation: kb-land 260ms var(--ease-out) backwards;
+  }
+
+  .kb-area,
+  .kb-now {
+    animation: kb-in 600ms var(--ease-out) backwards;
+  }
+
+  .kb-pulse {
+    animation: kb-ring 2.4s var(--ease-out) infinite;
+  }
+
+  .kb-row.is-opening {
+    animation: kx-up 800ms var(--ease-out) backwards;
+  }
+
+  /* a burn that arrives live */
+  .kb-seg.is-live {
+    animation: kb-in 300ms var(--ease-out) backwards;
+  }
+
+  .kb-dot.is-live {
+    animation: kb-pop 300ms var(--ease-out) backwards;
+  }
+
+  .kb-ring {
+    animation: kb-ring-out 900ms var(--ease-out);
+  }
+
+  .kb-row.is-new {
+    animation: kx-fade 600ms var(--ease-out) backwards;
+  }
+}
+
+/* under reduced motion a new total swaps by a short crossfade */
+@media (prefers-reduced-motion: reduce) {
+  .kb-total-text {
+    animation: kx-fade 200ms linear;
+  }
+}
+
+@keyframes kb-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes kb-land {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+}
+
+@keyframes kb-pop {
+  from {
+    transform: scale(0);
+  }
+}
+
+@keyframes kb-ring {
+  from {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(2.6);
+  }
+}
+
+@keyframes kb-ring-out {
+  from {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(3);
+  }
+}
+
+/* ---------- Narrow screens ---------- */
+
+@media (max-width: 980px) {
+  .kb-hero {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 40px;
+    padding-bottom: 72px;
+  }
+
+  .kb-chart {
+    flex: none;
+    min-height: 0;
+    height: clamp(220px, 34vw, 300px);
+  }
+}
+
+/* a phone has the ledger right under the hero, so the panel keeps only the chart */
+@media (max-width: 640px) {
+  .kb-latest {
+    display: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .kb-hero {
+    padding-top: 22px;
+  }
+
+  /* the phone keeps the capsule: it says how old the numbers are */
+  .kb .kx-live-count {
+    display: inline;
+  }
+
+  .kb-title {
+    margin-top: 18px;
+  }
+
+  .kb-stats {
+    margin-top: 26px;
+  }
+
+  .kb-stat-value {
+    font-size: 1.75rem;
+  }
+
+  .kb-stat-label {
+    margin-top: 8px;
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    /* a last resort for an extreme figure: wrap rather than run past the screen */
+    white-space: normal;
+  }
+
+  .kb-run {
+    margin-top: 22px;
+    font-size: 0.82rem;
+  }
+
+  /* the second clause or sentence takes its own line instead of wrapping mid-phrase */
+  .kb-more,
+  .kb-then {
+    display: block;
+  }
+
+  .kb-more::before {
+    content: none;
+  }
+
+  .kb-proof {
+    column-gap: 12px;
+    font-size: 0.8rem;
+  }
+
+  .kb-panel {
+    padding: 22px 18px 18px;
+    border-radius: 18px;
+  }
+
+  .kb-row a {
+    gap: 14px;
+    font-size: 0.85rem;
+  }
+}
+
+/* the S4 counts are big numerals: the page's -0.01em, so a two-digit count never joins (report.css keeps its own) */
+.kb-p .kr-count dd {
+  letter-spacing: -0.01em;
+}

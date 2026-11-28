@@ -375,6 +375,13 @@ export function HomeV2() {
             </a>
             . It has no pause and no upgrade, and it closes only after 30 days of public notice, while every bounty
             still pays.
+            <span className="kx-bounty-burn">
+              30% of the same fee buys $KEA and burns{" "}it.{" "}
+              <a href="/burn" onClick={follow}>
+                Watch every burn
+              </a>
+              .
+            </span>
             </span>
           </p>
         </section>
